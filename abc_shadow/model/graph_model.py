@@ -1,0 +1,2 @@
+class GraphModel(object):
+    pass
