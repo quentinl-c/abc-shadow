@@ -103,5 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Other
-output/
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
