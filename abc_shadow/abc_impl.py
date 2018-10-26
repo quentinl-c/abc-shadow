@@ -33,52 +33,45 @@ def abc_shadow(model, theta_prior, y, delta, n, size, iters,
                                      mask=mask)
 
         posteriors.append(theta_res)
+
         if i % 100 == 0:
-            msg = "Iteration {} / {} n : {}, mh_sampler {}, theta {}".format(
+            msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
                 i, iters, n, sampler_it, theta_res)
             print(msg)
+
     return posteriors
 
 
 def abc_shadow_chain(model, theta_prior, y, delta, n, size, sampler_it,
                      sampler=None, mask=None):
 
-    # print("theta prior : {}".format(theta_prior))
-    # print("y obs : {}".format(y))
     model.set_params(*theta_prior)
     theta_res = np.array(theta_prior)
 
     if sampler is not None:
-        # print("custom sampler")
         y_sim = sampler(model, size, sampler_it)
 
     else:
         y_sim = metropolis_sampler(model, size, sampler_it)
-    # print("y sim : {}".format(y_sim))
     for _ in range(n):
         candidate = get_candidate(theta_res, delta, mask)
-        #print("candidate : {}".format(candidate))
         alpha = get_shadow_density_ratio(model, y, y_sim, theta_res, candidate)
 
-        # print("alpha:{}".format(alpha))
         prob = random.uniform(0, 1)
 
         if alpha > prob:
-            # print("ACCEPT")
             theta_res = candidate
-        # else:
-            # print("reject")
     return theta_res
 
 
 def get_candidate(theta, delta, mask=None):
     """Get a candidate vector theta prime
-       picked from a Uniform distribution centred on theta
-       with a volume: delta / 2
+       picked from a Uniform distribution centred on theta (old)
+       with a volume bound: delta
 
     Arguments:
         theta {array[float]} -- intial theta parameter
-        delta {array[float]} -- volume : delta / 2
+        delta {array[float]} -- volume : delta
 
     Keyword Arguments:
         mask {array[bool /int{0,1}]} -- maskek array to fix theta element
@@ -93,13 +86,15 @@ def get_candidate(theta, delta, mask=None):
     """
 
     if len(delta) != len(theta):
-        raise ValueError("delta array should have the same length as theta")
+        err_msg = "⛔️ delta array should have the same length as theta"
+        raise ValueError(err_msg)
 
     candidate_vector = np.array(theta, dtype=float, copy=True)
 
     if mask is not None:
         if len(mask) != len(theta):
-            raise ValueError("mask array should have the same length as theta")
+            err_msg = "🤯 mask array should have the same length as theta"
+            raise ValueError(err_msg)
 
         indices = set(range(len(theta))) - set(np.nonzero(mask)[0])
     else:
@@ -121,15 +116,15 @@ def get_candidate(theta, delta, mask=None):
 
 def get_shadow_density_ratio(model, y_obs, y_sim, theta, candidate):
     model.set_params(*candidate)
-    p1 = model.evaluate_from_stats(y_obs)
-    q2 = model.evaluate_from_stats(y_sim)
+    p1 = model.evaluate_from_stats(*y_obs)
+    q2 = model.evaluate_from_stats(*y_sim)
 
     model.set_params(*theta)
-    p2 = model.evaluate_from_stats(y_obs)
-    q1 = model.evaluate_from_stats(y_sim)
+    p2 = model.evaluate_from_stats(*y_obs)
+    q1 = model.evaluate_from_stats(*y_sim)
 
     ratio = (exp(p1 - p2)) * (exp(q1 - q2))
-    # print("ratio : {}".format(ratio))
+
     alpha = min(1, ratio)
 
     return alpha
@@ -145,7 +140,9 @@ def metropolis_sampler(model, size, mh_sampler_it):
     if isinstance(model, GraphModel):
         init_sample = GraphWrapper(size)
     else:
-        init_sample = list()
+        err_msg = "⛔️ metropolis_sampler wrapper may only be used" \
+                  "to sample graph"
+        raise ValueError(err_msg)
 
     samples = mh_sampler(init_sample, model, mh_sampler_it)
 

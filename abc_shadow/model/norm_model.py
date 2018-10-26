@@ -35,27 +35,15 @@ class NormModel(object):
         exp -= (2 * self.__var)**(-1) * sample.get_sample_square_sum()
         return exp
 
-    def evaluate_from_stats(self, stats):
+    def evaluate_from_stats(self, *args):
 
-        if len(stats) < 2:
-            raise ValueError("Given args lenght:{}, expected: 2".format(
-                len(args)))
-        expr = (self.__mean / self.__var) * stats[0]
-        expr -= (1/(2 * self.__var)) * stats[1]
-        return expr
+        if len(args) < 2:
+            raise ValueError("⛔️ Given stats lenght:{}, expected: 2".format(
+                len(stats)))
 
-    def compute_delta(self, sample, id, new_val):
-        old_energy = self.evaluate(sample)
-
-        sample.set_particle(id, new_val)
-        new_energy = self.evaluate(sample)
-
-        delta = old_energy - new_energy
-        return delta
-
-    @classmethod
-    def get_random_candidate_val(cls):
-        return np.random.uniform(cls.min_extrem, cls.max_extrem)
+        res = (self.__mean / self.__var) * args[0]
+        res -= (1/(2 * self.__var)) * args[1]
+        return res
 
     @staticmethod
     def summary(results):
