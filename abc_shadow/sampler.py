@@ -1,6 +1,8 @@
 import copy
-from math import exp
 import random
+from math import exp
+
+from .model.graph_model import GraphModel
 
 DEFAULT_ITER = 100
 
@@ -15,9 +17,17 @@ def mh_sampler(sample, model, iters=DEFAULT_ITER):
     Keyword Arguments:
         iter {int} -- Number of iterations (default: {DEFAULT_ITER})
 
+    Raises:
+        ValueError -- Only graphs can be sampled
+                      (check if the give model is a GraphModel)
+
     Returns:
         list[GraphWrapper] -- List of resulting graphs for each iteration
     """
+
+    if not isinstance(model, GraphModel):
+        err_msg = "⛔️ mh_sampler function can only sample graph"
+        raise ValueError(err_msg)
 
     # resulting list
     results = list()
