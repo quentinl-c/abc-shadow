@@ -14,7 +14,7 @@ Implementation of ABC Shadow Algorithm
 
 
 def abc_shadow(model, theta_prior, y, delta, n, size, iters,
-               sampler=None, sampler_it=100, mask=None):
+               sampler=None, sampler_it=1, mask=None):
 
     posteriors = list()
 
@@ -153,11 +153,33 @@ def metropolis_sampler(model, size, mh_sampler_it):
     return np.array(vec)
 
 
-def normal_sampler(model, size, it):
+def normal_sampler(model, size, it, seed=None):
     samples = list()
+
     for _ in range(it):
-        samples.append(np.random.normal(model.get_mean(),
-                                        sqrt(model.get_var()), size))
+        if seed is not None:
+            np.random.seed(seed)
+
+        sample = np.random.normal(model.get_mean(),
+                                  sqrt(model.get_var()), size)
+        samples.append(sample)
+
+    y_sim = [np.average(stats) for stats in model.summary(samples).values()]
+    return np.array(y_sim)
+
+
+def binom_sampler(model, size, it, seed=None):
+    samples = list()
+    theta = model.get_theta()
+    p = exp(theta) / (1 + exp(theta))
+    n = model.get_n()
+
+    for _ in range(it):
+        if seed is not None:
+            np.random.seed(seed)
+
+        sample = np.random.binomial(n, p, size)
+        samples.append(sample)
 
     y_sim = [np.average(stats) for stats in model.summary(samples).values()]
     return np.array(y_sim)
