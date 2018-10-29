@@ -146,7 +146,7 @@ class BernouilliModel(GraphModel):
 
     @classmethod
     def get_random_candidate_val(cls):
-        return random.choice(cls.type_values, 1)[0]
+        return random.choice(list(cls.type_values), 1)[0]
 
     @staticmethod
     def summary(results):
