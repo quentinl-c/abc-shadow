@@ -9,16 +9,21 @@ from abc_shadow.model.bernouilli_model import BernouilliModel
 def main():
     """Experience sumary:
     * Random seed -> to make this experience more reproducible
-    * Binomial model may be expressed as an exponential model
+    * Bernouilli model may be expressed as an exponential model
     (relatively constant):
-    exp[k * theta - n log(1+ exp(theta))]
-       * theta is the single parameter
-       * k is the number of successes happened in n trials
-       * n is the number of trials (fixed)
+    exp[theta1 * t1(y) + theta2 * t2(y))]
+       * theta1 is the none_edge parameter
+         representing the portion of none edge in a graph (fixed)
+       * theta2 is the edge parameter
+         representing the portion of existing edge in a graph
+       * t1(y) is the number of none edges in the observed graph
+         (not existing edges)
+       * t2(y) is the number of edges in the observed graph (existing)
     * theta_prior is the parameter estimated a priori
       (may be far from the real theta value)
-    * y_obs corresponds to the observed sufficient statistics in our case: k
-    * size -> corresponds to the sample's length
+    * y_obs corresponds to the observed sufficient statistics in our case: 
+      t1(y_obs), t2(y_obs)
+    * size -> corresponds to the graph dimension ie. number of nodes
     """
 
     seed = 2018
