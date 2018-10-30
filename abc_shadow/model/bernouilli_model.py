@@ -53,6 +53,15 @@ class BernouilliModel(GraphModel):
         self.set_none_edge_param(args[0])
         self.set_edge_param(args[1])
 
+    def get_none_edge_param(self):
+        """Get edge parameter
+
+        Returns:
+            float -- Edge parameter
+        """
+
+        return self._none_edge_param
+
     def get_edge_param(self):
         """Get edge parameter
 
@@ -140,7 +149,8 @@ class BernouilliModel(GraphModel):
         if len(args) < 2:
             raise ValueError
 
-        edge_side = (self._none_edge_param * args[0] + self._edge_param * args[1])
+        edge_side = self._none_edge_param * args[0]
+        edge_side += self._edge_param * args[1]
 
         return edge_side
 
