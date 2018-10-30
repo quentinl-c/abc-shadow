@@ -7,6 +7,7 @@ import numpy.ma as ma
 from .model.graph_model import GraphModel
 from .graph.graph_wrapper import GraphWrapper
 from .sampler import mh_sampler
+import copy
 
 """
 Implementation of ABC Shadow Algorithm
@@ -34,7 +35,7 @@ def abc_shadow(model, theta_prior, y, delta, n, size, iters,
 
         posteriors.append(theta_res)
 
-        if i % 100 == 0:
+        if i % 10 == 0:
             msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
                 i, iters, n, sampler_it, theta_res)
             print(msg)
@@ -124,7 +125,6 @@ def get_shadow_density_ratio(model, y_obs, y_sim, theta, candidate):
     q1 = model.evaluate_from_stats(*y_sim)
 
     ratio = (exp(p1 - p2)) * (exp(q1 - q2))
-
     alpha = min(1, ratio)
 
     return alpha
@@ -132,25 +132,9 @@ def get_shadow_density_ratio(model, y_obs, y_sim, theta, candidate):
 """
 ===============
 Samplers
+> Functions used to generate samples from a given probability density function
 ===============
 """
-
-
-def metropolis_sampler(model, size, mh_sampler_it):
-    if isinstance(model, GraphModel):
-        init_sample = GraphWrapper(size)
-    else:
-        err_msg = "⛔️ metropolis_sampler wrapper may only be used" \
-                  "to sample graph"
-        raise ValueError(err_msg)
-
-    samples = mh_sampler(init_sample, model, mh_sampler_it)
-
-    summary = model.summary(samples)
-
-    vec = [np.average(stats) for stats in summary.values()]
-
-    return np.array(vec)
 
 
 def normal_sampler(model, size, it, seed=None):
@@ -183,3 +167,62 @@ def binom_sampler(model, size, it, seed=None):
 
     y_sim = [np.average(stats) for stats in model.summary(samples).values()]
     return np.array(y_sim)
+
+"""
+Graph Sampler
+"""
+
+
+def metropolis_sampler(model, size, mh_sampler_it):
+    
+    if isinstance(model, GraphModel):
+        init_sample = GraphWrapper(size)
+    else:
+        err_msg = "⛔️ metropolis_sampler wrapper may only be used" \
+                  "to sample graph"
+        raise ValueError(err_msg)
+
+    samples = mh_sampler(init_sample, model, mh_sampler_it)
+
+    summary = model.summary(samples)
+
+    vec = [np.average(stats) for stats in summary.values()]
+    return np.array(vec)
+
+
+def bernouilli_sampler(model, size, it, seed=None):
+    sample = GraphWrapper(size)
+
+    seeds = None
+    if seed is not None:
+        np.random.seed(seed)
+        size = it * len(sample.get_elements())
+        seeds = iter(np.random.random_integers(0, 1000, size=size))
+
+    none_edge_param = model.get_none_edge_param()
+    edge_param = model.get_edge_param()
+
+    none_edge_prob = none_edge_param / (edge_param + none_edge_param)
+    edge_prob = edge_param / (edge_param + none_edge_param)
+    probs = [none_edge_prob, edge_prob]
+
+    dist = list()
+
+    for i in range(it):
+        for edge in sample.get_elements():
+
+            if seeds is not None:
+                s = seeds.__next__()
+                np.random.seed(s)
+
+            edge_attr = np.random.choice(a=list(model.type_values),
+                                         size=1,
+                                         replace=False,
+                                         p=probs)
+            sample.set_edge_type(edge, edge_attr[0])
+
+        dist.append(copy.deepcopy(sample))
+
+    mean_stats = (np.mean([s.get_none_edge_count() for s in dist]),
+                  np.mean([s.get_edge_count() for s in dist]))
+    return mean_stats
