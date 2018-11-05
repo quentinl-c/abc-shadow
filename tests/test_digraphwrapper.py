@@ -3,7 +3,9 @@ import random
 import networkx as nx
 import pytest
 
-from abc_shadow.graph.graph_wrapper import GraphWrapper
+from abc_shadow.graph.digraph_wrapper import (DiGraphWrapper,
+                                              _lg_directed_in_in,
+                                              _lg_directed_out_out)
 
 DIM = 10
 
@@ -14,20 +16,21 @@ Fixtures
 
 @pytest.fixture(params=[DIM])
 def get_graph_by_dim(request):
-    graph_wrapper = GraphWrapper(request.param)
+    graph_wrapper = DiGraphWrapper(request.param)
     return graph_wrapper
 
 
 @pytest.fixture
 def get_random_edge(get_graph_by_dim):
     edges = get_graph_by_dim.get_elements()
-    random_edge = random.sample(list(iter(edges)), k=1)[0]
+    random_edge = random.sample(list(edges), k=1)[0]
     return random_edge
 
 
 @pytest.fixture
 def get_florentine_graph():
-    return nx.florentine_families_graph()
+    return nx.DiGraph(nx.florentine_families_graph())
+
 
 """
 Test cases
@@ -35,16 +38,15 @@ Test cases
 
 
 def test_graph_creation_from_graph(get_florentine_graph):
-    graphwrapper = GraphWrapper(get_florentine_graph)
+    graphwrapper = DiGraphWrapper(gr=get_florentine_graph)
     nx.set_edge_attributes(get_florentine_graph, 1, 'type')
 
     compl_flor = nx.complement(get_florentine_graph)
     get_florentine_graph.add_edges_from(compl_flor.edges(), type=0)
 
-    edge_attr = set({tuple(sorted(key)): int(val)
-                 for key, val in nx.get_edge_attributes(get_florentine_graph, 'type').items()})
+    edge_attr = nx.get_edge_attributes(get_florentine_graph, 'type')
 
-    node_attr = set(nx.get_node_attributes(graphwrapper.get_graph(), 'type'))
+    node_attr = nx.get_node_attributes(graphwrapper.get_graph(), 'type')
     assert edge_attr == node_attr
 
 
