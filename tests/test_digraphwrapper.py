@@ -49,6 +49,24 @@ def test_graph_creation_from_graph(get_florentine_graph):
     node_attr = nx.get_node_attributes(graphwrapper.get_graph(), 'type')
     assert edge_attr == node_attr
 
+    # Basic Line Grap built upon a in-out neighbourhood
+    l_flor = nx.line_graph(get_florentine_graph)
+    nx.set_edge_attributes(l_flor, 'in-out', 'relation')
+
+    # In-in neighbourhood
+    in_in_edges = _lg_directed_in_in(get_florentine_graph).edges()
+    l_flor.add_edges_from(in_in_edges, relation='in-in')
+
+    # Out-out neighbourhood
+    out_out_edges = _lg_directed_out_out(get_florentine_graph).edges()
+    l_flor.add_edges_from(out_out_edges, relation='out-out')
+
+    l_edge_attr = nx.get_edge_attributes(l_flor, 'relation')
+    wrapper_edge_attr = nx.get_edge_attributes(graphwrapper.get_graph(),
+                                               'relation')
+
+    assert l_edge_attr == wrapper_edge_attr
+
 
 def test_graph_dim(get_graph_by_dim):
     assert get_graph_by_dim.get_initial_dim() == DIM
