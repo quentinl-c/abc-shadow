@@ -6,6 +6,9 @@ DEFAULT_DIM = 10
 
 class GraphWrapper(object):
 
+    def __init__(self):
+        self._graph = None
+
     def __init__(self, dim=DEFAULT_DIM, gr=None):
         """Initialize Graph Wrapper object
         This is a wrapper over a networkx graph
@@ -28,12 +31,16 @@ class GraphWrapper(object):
             # Generate a complete graph instead
             graph = nx.complete_graph(dim)
 
-            self.__graph = nx.line_graph(graph)
-            nx.set_node_attributes(self.__graph, 0, 'type')
+            self._graph = nx.line_graph(graph)
+            nx.set_node_attributes(self._graph, 0, 'type')
 
         else:
             if isinstance(gr, nx.DiGraph) or isinstance(gr, nx.MultiGraph):
-                raise TypeError("The passed graph must be a Graph")
+                msg = "⛔️ The graph passed in argument must be a Graph,"\
+                      "for wrapping DiGraph, you should use DiGraphWrapper."
+
+                raise TypeError(msg)
+
             graph = gr.copy()
 
             compl_graph = nx.complement(graph)
@@ -52,7 +59,7 @@ class GraphWrapper(object):
             graph = nx.line_graph(graph)
             nx.set_node_attributes(graph, attr, 'type')
 
-            self.__graph = graph
+            self._graph = graph
 
     def get_graph(self):
         """Returns the Networkx graph corresponding to the graph model
@@ -61,7 +68,7 @@ class GraphWrapper(object):
             nx.Graph -- Corresponding graph
         """
 
-        return self.__graph
+        return self._graph
 
     def get_initial_dim(self):
         """Returns the dimension of the initial graph
@@ -70,7 +77,7 @@ class GraphWrapper(object):
             int -- Dimension of the initial graph
         """
 
-        return len(nx.inverse_line_graph(self.__graph))
+        return len(nx.inverse_line_graph(self._graph))
 
     def get_none_edge_count(self):
         """Return the number of nodes labelled as none edge
@@ -79,29 +86,19 @@ class GraphWrapper(object):
             int -- number of none 'edges'
         """
         return len(
-            [e for e in nx.get_node_attributes(self.__graph, 'type').values()
+            [e for e in nx.get_node_attributes(self._graph, 'type').values()
                 if e == 0])
 
     def get_edge_count(self):
-        """Return the number of nodes labelled as directed edge
+        """Return the number of nodes labelled as directed edge / edge
 
         Returns:
             int -- number of directed 'edges'
         """
 
         return len(
-            [e for e in nx.get_node_attributes(self.__graph, 'type').values()
+            [e for e in nx.get_node_attributes(self._graph, 'type').values()
                 if e == 1])
-
-    def get_dyadic_count(self):
-        """Return the number of nodes labelled as mutual edge
-
-        Returns:
-            int -- number of mutual 'edges'
-        """
-        return len(
-            [e for e in nx.get_node_attributes(self.__graph, 'type').values()
-                if e == 2])
 
     def get_elements(self):
         """Get de list of line graph nodes
@@ -111,7 +108,7 @@ class GraphWrapper(object):
             List[EdgeId] -- list of edge identifiers (tuple)
         """
 
-        return self.__graph.nodes()
+        return self._graph.nodes()
 
     def get_particle(self, id):
         return self.get_edge_type(id)
@@ -126,7 +123,7 @@ class GraphWrapper(object):
         Returns:
             int -- Edge type
         """
-        return self.__graph.nodes[edge_id]['type']
+        return self._graph.nodes[edge_id]['type']
 
     def set_particle(self, id, new_val):
         self.set_edge_type(id, new_val)
@@ -145,7 +142,7 @@ class GraphWrapper(object):
         except:
             raise TypeError()
 
-        self.__graph.nodes[edge_id]['type'] = val
+        self._graph.nodes[edge_id]['type'] = val
 
     def get_edge_neighbourhood(self, edge):
         """Get the neighbourhood of the edge
@@ -156,7 +153,7 @@ class GraphWrapper(object):
         Returns:
             List[EdgeId] -- Neighbours
         """
-        neighs = [t for t in self.__graph.neighbors(edge)]
+        neighs = [t for t in self._graph.neighbors(edge)]
         res = [e for e in neighs if e > edge]
 
         return res
