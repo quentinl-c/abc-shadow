@@ -48,14 +48,15 @@ def directed_line_graph(gr):
     # Draw the Line Graph of gr
     # Basic Line Grap built upon a in-out neighbourhood
     l_gr = nx.line_graph(gr)
+    nx.set_edge_attributes(l_gr, 'in-out', 'relation')
 
     # In-in neighbourhood
     in_in_edges = _lg_directed_in_in(gr).edges()
-    l_gr.add_edges_from(in_in_edges)
+    l_gr.add_edges_from(in_in_edges, relation='in-in')
 
     # Out-out neighbourhood
     out_out_edges = _lg_directed_out_out(gr).edges()
-    l_gr.add_edges_from(out_out_edges)
+    l_gr.add_edges_from(out_out_edges, relation='out-out')
 
     nx.set_node_attributes(l_gr, attr, 'type')
 
