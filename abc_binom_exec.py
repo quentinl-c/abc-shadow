@@ -21,11 +21,11 @@ def main():
 
     seed = 2018
     theta = - 10
-    n = 100  # fixed
+    n_p = 100  # fixed
     theta_perfect = np.array([theta])
 
     theta_prior = np.array([10])
-    model = BinomialModel(n, theta_perfect[0])
+    model = BinomialModel(n_p, theta_perfect[0])
     size = 1
 
     y_obs = binom_sampler(model, size, 1, seed=seed)
