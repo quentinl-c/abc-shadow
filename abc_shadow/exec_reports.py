@@ -4,13 +4,13 @@ import numpy as np
 
 class ABCExecutionReport(object):
 
-    def __init__(self, delta, n, iters, model, theta_prior, y, dim,
+    def __init__(self, delta, n, iters, model, theta_0, y, dim,
                  mh_sampler_iter):
         self.delta = delta
         self.n = n
         self.iters = iters
         self.model = model
-        self.theta_prior = theta_prior
+        self.theta_0 = theta_0
         self.y = y
         self.dim = dim
         self.mh_sampler_iter = mh_sampler_iter
@@ -25,9 +25,9 @@ class ABCExecutionReportJSON(json.JSONEncoder):
             json_dict['delta'] = o.delta
             json_dict['n'] = o.n
             json_dict['mh_sampler_iter'] = o.mh_sampler_iter
-            json_dict['prior'] = (o.theta_prior.tolist()
-                                  if isinstance(o.theta_prior, np.ndarray)
-                                  else o.theta_prior)
+            json_dict['prior'] = (o.theta_0.tolist()
+                                  if isinstance(o.theta_0, np.ndarray)
+                                  else o.theta_0)
             json_dict['y'] = (o.y.tolist()
                               if isinstance(o.y, np.ndarray)
                               else o.y)

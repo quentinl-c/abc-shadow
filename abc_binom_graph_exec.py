@@ -19,7 +19,7 @@ def main():
        * t1(y) is the number of none edges in the observed graph
          (not existing edges)
        * t2(y) is the number of edges in the observed graph (existing)
-    * theta_prior is the parameter estimated a priori
+    * theta_0 is the parameter estimated a priori
       (may be far from the real theta value)
     * y_obs corresponds to the observed sufficient statistics in our case: 
       t1(y_obs), t2(y_obs)
@@ -32,7 +32,7 @@ def main():
 
     theta_perfect = np.array([none_edge_param, edge_param])
 
-    theta_prior = np.array([none_edge_param, 10])
+    theta_0 = np.array([none_edge_param, 10])
     model = BinomialGraphModel(theta_perfect[0], theta_perfect[1])
     size = 10
 
@@ -49,9 +49,9 @@ def main():
     # Delta -> Bounds of proposal volume
     delta = np.array([0.05, 0.05])
 
-    model.set_params(*theta_prior)
+    model.set_params(*theta_0)
     posteriors = abc_shadow(model,
-                            theta_prior,
+                            theta_0,
                             y_obs,
                             delta,
                             n,
