@@ -13,7 +13,7 @@ def main():
        * theta is the single parameter
        * k is the number of successes happened in n trials
        * n is the number of trials (fixed)
-    * theta_prior is the parameter estimated a priori
+    * theta_0 is the parameter estimated a priori
       (may be far from the real theta value)
     * y_obs corresponds to the observed sufficient statistics in our case: k
     * size -> corresponds to the sample's length
@@ -24,7 +24,7 @@ def main():
     n_p = 100  # fixed
     theta_perfect = np.array([theta])
 
-    theta_prior = np.array([10])
+    theta_0 = np.array([10])
     model = BinomialModel(n_p, theta_perfect[0])
     size = 1
 
@@ -41,9 +41,9 @@ def main():
     # Delta -> Bounds of proposal volume
     delta = np.array([0.05])
 
-    model.set_params(*theta_prior)
+    model.set_params(*theta_0)
     posteriors = abc_shadow(model,
-                            theta_prior,
+                            theta_0,
                             y_obs,
                             delta,
                             n,

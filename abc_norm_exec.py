@@ -14,7 +14,7 @@ def main():
        * theta2 is the variance parameter (std^2)
        * t1 is the sum of all sampled number sum(y_i)
        * t2 is the sum of all squared sampled number sum(y_i^2)
-    * theta_prior is the vector of parameters estimated a priori
+    * theta_0 is the vector of parameters estimated a priori
       (may be far from the real theta value)
     * y_obs corresponds to the observed sufficient statistics in our case: 
     [t1(y),t2(y)]
@@ -26,8 +26,8 @@ def main():
     var = 9
     theta_perfect = np.array([mean, var])
 
-    theta_prior = np.array([10, 10])
-    model = NormModel(theta_prior[0], theta_prior[1])
+    theta_0 = np.array([10, 10])
+    model = NormModel(theta_0[0], theta_0[1])
     size = 1000
 
     y_obs = normal_sampler(model, size, 1, seed=seed)
@@ -43,9 +43,9 @@ def main():
     # Delta -> Bounds of proposal volume
     delta = np.array([0.05, 0.05])
 
-    model.set_params(*theta_prior)
+    model.set_params(*theta_0)
     posteriors = abc_shadow(model,
-                            theta_prior,
+                            theta_0,
                             y_obs,
                             delta,
                             n,

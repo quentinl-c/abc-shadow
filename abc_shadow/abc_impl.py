@@ -14,12 +14,12 @@ Implementation of ABC Shadow Algorithm
 """
 
 
-def abc_shadow(model, theta_prior, y, delta, n, size, iters,
+def abc_shadow(model, theta_0, y, delta, n, size, iters,
                sampler=None, sampler_it=1, mask=None):
 
     posteriors = list()
 
-    theta_res = theta_prior
+    theta_res = theta_0
     posteriors.append(theta_res)
 
     for i in range(iters):
@@ -43,11 +43,11 @@ def abc_shadow(model, theta_prior, y, delta, n, size, iters,
     return posteriors
 
 
-def abc_shadow_chain(model, theta_prior, y, delta, n, size, sampler_it,
+def abc_shadow_chain(model, theta_0, y, delta, n, size, sampler_it,
                      sampler=None, mask=None):
 
-    model.set_params(*theta_prior)
-    theta_res = np.array(theta_prior)
+    model.set_params(*theta_0)
+    theta_res = np.array(theta_0)
 
     if sampler is not None:
         y_sim = sampler(model, size, sampler_it)
