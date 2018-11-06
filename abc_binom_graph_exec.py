@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from abc_shadow.abc_impl import abc_shadow, binomial_grapb_sampler
+from abc_shadow.abc_impl import abc_shadow, binomial_graph_sampler
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 
 
@@ -57,7 +57,7 @@ def main():
                             n,
                             size,
                             iters,
-                            sampler=binomial_grapb_sampler,
+                            sampler=binomial_graph_sampler,
                             sampler_it=100,
                             mask=[1, 0])  # n_edge_p is fixed
 

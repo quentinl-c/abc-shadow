@@ -190,7 +190,7 @@ def metropolis_sampler(model, size, mh_sampler_it):
     return np.array(vec)
 
 
-def bernouilli_sampler(model, size, it, seed=None):
+def binom_graph_sampler(model, size, it, seed=None):
     sample = GraphWrapper(size)
 
     seeds = None
