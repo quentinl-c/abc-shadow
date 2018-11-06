@@ -2,7 +2,7 @@ import numpy.random as random
 from .graph_model import GraphModel
 
 
-class BernouilliModel(GraphModel):
+class BinomialGraphModel(GraphModel):
     """
     type_value is related to the different edge types
     - 0 : edge doesn't exist (no edge)

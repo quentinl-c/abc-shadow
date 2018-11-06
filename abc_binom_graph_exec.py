@@ -2,8 +2,8 @@ import json
 
 import numpy as np
 
-from abc_shadow.abc_impl import abc_shadow, bernouilli_sampler
-from abc_shadow.model.bernouilli_model import BernouilliModel
+from abc_shadow.abc_impl import abc_shadow, binomial_grapb_sampler
+from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 
 
 def main():
@@ -33,10 +33,10 @@ def main():
     theta_perfect = np.array([none_edge_param, edge_param])
 
     theta_prior = np.array([none_edge_param, 10])
-    model = BernouilliModel(theta_perfect[0], theta_perfect[1])
+    model = BinomialGraphModel(theta_perfect[0], theta_perfect[1])
     size = 10
 
-    y_obs = bernouilli_sampler(model, size, 100, seed)
+    y_obs = binomial_grapb_sampler(model, size, 100, seed)
 
     # ABC Shadow parameters
 
@@ -57,7 +57,7 @@ def main():
                             n,
                             size,
                             iters,
-                            sampler=bernouilli_sampler,
+                            sampler=binomial_grapb_sampler,
                             sampler_it=100,
                             mask=[1, 0])  # n_edge_p is fixed
 
