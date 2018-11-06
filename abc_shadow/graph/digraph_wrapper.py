@@ -41,6 +41,28 @@ class DiGraphWrapper(GraphWrapper):
 
         return self.__dim
 
+    def get_in_out_count(self):
+        """Returns the number of in - out relations in the line graph representation
+
+        Returns:
+            int -- number of in - out (edge) relation
+        """
+
+        bridges = 0
+        active_edges = self.get_active_edges()
+        edge_attr = nx.get_edge_attributes(self._graph, 'relation').items()
+        for e, r_attr in edge_attr:
+            if(r_attr == 'in-out' and e[0] in active_edges and
+               e[1] in active_edges):
+                bridges += 1
+        return bridges
+
+"""
+====================
+Additional functions
+====================
+"""
+
 
 def directed_line_graph(gr):
     attr = nx.get_edge_attributes(gr, 'type')
