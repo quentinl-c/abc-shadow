@@ -1,11 +1,11 @@
 """Dyadic model module
 """
-import numpy.random
-from .bernouilli_model import BernouilliModel
+import numpy.random as random
+from .bernouilli_model import BinomialGraphModel
 D_DYAD_PARAM = 1.0
 
 
-class DyadicModel(BernouilliModel):
+class DyadicModel(BinomialGraphModel):
     """
     type_values is related to the different edge types
     - 0 : edge doesn't exist (none edge)
@@ -23,7 +23,7 @@ class DyadicModel(BernouilliModel):
             edge_param {float} -- value of edge parameter
             dyadic_param {float} -- value of dyadic parameter
         """
-        BernouilliModel.__init__(self, none_edge_param, edge_param)
+        BinomialGraphModel.__init__(self, none_edge_param, edge_param)
         self._dyadic_param = dyadic_param
 
     def set_params(self, *args):
