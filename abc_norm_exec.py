@@ -27,7 +27,7 @@ def main():
     theta_perfect = np.array([mean, var])
 
     theta_0 = np.array([10, 10])
-    model = NormModel(theta_0[0], theta_0[1])
+    model = NormModel(theta_perfect[0], theta_perfect[1])
     size = 1000
 
     y_obs = normal_sampler(model, size, 1, seed=seed)
