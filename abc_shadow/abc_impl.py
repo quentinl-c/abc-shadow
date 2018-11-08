@@ -16,6 +16,29 @@ Implementation of ABC Shadow Algorithm
 
 def abc_shadow(model, theta_0, y, delta, n, size, iters,
                sampler=None, sampler_it=1, mask=None):
+    """Executes ABC posterior sampling
+    
+    Arguments:
+        model {GraphModel | Model} -- Model encompassing phenomenon of nterest
+        theta_0 {[type]} -- Initial parameter (must match to model's parameters)
+        y {List[Sample]} -- Obseved sample(s)
+        delta {List[float]} -- Bounds of proposal volumes for each parameter
+        n {in} -- number of iteration for the shadow chain
+        size {int} -- Size of sample(s) sampled at initialisation of the shadow chain
+        iters {int} -- Number of posterior samples
+    
+    Keyword Arguments:
+        sampler {fct} -- Sampler function respeciting the following constraint on arguments 
+                         args: model, size, it, seed=None
+                         (default: {metropolis_hasting graph sampler})
+        sampler_it {int} -- Number of sampler iteration  (default: {1})
+        mask {[type]} -- Mask array to fix some parameter (by setting 1 at the parameter position)
+                         (default: {None})
+    
+    Returns:
+        List[np.array] -- List of sampled parameters -> posterior distribution
+    """
+
 
     posteriors = list()
 
@@ -45,6 +68,28 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
 
 def abc_shadow_chain(model, theta_0, y, delta, n, size, sampler_it,
                      sampler=None, mask=None):
+    """Executes ABC Shdow chain algorithm
+    
+    Arguments:
+        model {GraphModel | Model} -- Model encompassing phenomenon of nterest
+        theta_0 {[type]} -- Initial parameter (must match to model's parameters)
+        y {List[Sample]} -- Obseved sample(s)
+        delta {List[float]} -- Bounds of proposal volumes for each parameter
+        n {in} -- number of iteration for the shadow chain
+        size {int} -- Size of sample(s) sampled at initialisation of the shadow chain
+        sampler_it {int} -- Number of sampler iteration
+  
+    Keyword Arguments:
+       sampler {fct} -- Sampler function respeciting the following constraint on arguments 
+                         args: model, size, it, seed=None
+                         (default: {metropolis_hasting graph sampler})
+       mask {[type]} -- Mask array to fix some parameter (by setting 1 at the parameter position)
+                         (default: {None})
+    
+    Returns:
+        np.array -- Last accepted candidate parameter
+    """
+
 
     model.set_params(*theta_0)
     theta_res = np.array(theta_0)
