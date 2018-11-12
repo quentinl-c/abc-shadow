@@ -1,7 +1,9 @@
 """Dyadic model module
 """
 import numpy.random as random
-from .bernouilli_model import BinomialGraphModel
+from .binomial_graph_model import BinomialGraphModel
+
+
 D_DYAD_PARAM = 1.0
 
 
