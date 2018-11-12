@@ -40,13 +40,17 @@ def mh_sampler(sample, model, iters=DEFAULT_ITER):
             # Swap between old value and the new one (randomly taken)
             old_val = sample.get_particle(e)
             new_val = model.get_random_candidate_val()
+            # new_val = 1
 
             delta = model.compute_delta(sample, e, new_val)
 
             epsilon = random.uniform(0, 1)
 
-            if epsilon >= exp(-delta):
+            if epsilon >= exp(delta):
+                #print('rejected {}'.format(new_val))
                 # Old value recovery
                 sample.set_particle(e, old_val)
+            #else:
+                #print('Accepted {} -> {}'.format(old_val, new_val))
 
     return results
