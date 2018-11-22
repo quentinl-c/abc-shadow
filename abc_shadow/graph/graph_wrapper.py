@@ -1,13 +1,10 @@
 import networkx as nx
-import collections
+from collections.abc import Iterable
 
 DEFAULT_DIM = 10
 
 
 class GraphWrapper(object):
-
-    def __init__(self):
-        self._graph = None
 
     def __init__(self, dim=DEFAULT_DIM, gr=None):
         """Initialize Graph Wrapper object
@@ -26,40 +23,44 @@ class GraphWrapper(object):
                          if no graph is passed (grap argument is None)
             gr {networkx.Graph} -- input graph (default: {None})
         """
-
-        if gr is None:
-            # Generate a complete graph instead
-            graph = nx.complete_graph(dim)
-
-            self._graph = nx.line_graph(graph)
-            nx.set_node_attributes(self._graph, 0, 'type')
+        if dim is None:
+            self._graph = None
 
         else:
-            if isinstance(gr, nx.DiGraph) or isinstance(gr, nx.MultiGraph):
-                msg = "⛔️ The graph passed in argument must be a Graph,"\
-                      "for wrapping DiGraph, you should use DiGraphWrapper."
+            if gr is None:
+                # Generate a complete graph instead
+                graph = nx.complete_graph(dim)
 
-                raise TypeError(msg)
+                self._graph = nx.line_graph(graph)
+                nx.set_node_attributes(self._graph, 0, 'type')
 
-            graph = gr.copy()
+            else:
+                if isinstance(gr, nx.DiGraph) or isinstance(gr, nx.MultiGraph):
+                    msg = "⛔️ The graph passed in argument must be a Graph,"\
+                        "for wrapping DiGraph, you should use DiGraphWrapper."
 
-            compl_graph = nx.complement(graph)
-            nx.set_edge_attributes(graph, 1, 'type')
+                    raise TypeError(msg)
 
-            graph.add_edges_from(compl_graph.edges(), type=0)
+                graph = gr.copy()
 
-            attr = nx.get_edge_attributes(graph, 'type')
+                compl_graph = nx.complement(graph)
+                nx.set_edge_attributes(graph, 1, 'type')
 
-            is_key_iterable = all([isinstance(key,  collections.Iterable)
-                                   for key in attr.keys()])
+                graph.add_edges_from(compl_graph.edges(), type=0)
 
-            if is_key_iterable:
-                attr = {tuple(sorted(key)): val for key, val in attr.items()}
+                attr = nx.get_edge_attributes(graph, 'type')
 
-            graph = nx.line_graph(graph)
-            nx.set_node_attributes(graph, attr, 'type')
+                is_key_iterable = all([isinstance(key, Iterable)
+                                       for key in attr.keys()])
 
-            self._graph = graph
+                if is_key_iterable:
+                    attr = {tuple(sorted(key)): val for key,
+                            val in attr.items()}
+
+                graph = nx.line_graph(graph)
+                nx.set_node_attributes(graph, attr, 'type')
+
+                self._graph = graph
 
     def get_graph(self):
         """Returns the Networkx graph corresponding to the graph model
@@ -111,6 +112,15 @@ class GraphWrapper(object):
         return self._graph.nodes()
 
     def get_particle(self, id):
+        """Wrapper of get_edge_type method
+
+        Arguments:
+            id {EdgeId} -- Edge identifier
+
+        Returns:
+            int -- Edge type
+        """
+
         return self.get_edge_type(id)
 
     def get_edge_type(self, edge_id):
@@ -125,7 +135,32 @@ class GraphWrapper(object):
         """
         return self._graph.nodes[edge_id]['type']
 
+    def is_active_edge(self, edge_id):
+        """Returns True if the edge referred by edge_id
+        is active (i.e. edge_type == 1)
+        False otherwise
+
+        Arguments:
+            edge_id {EdgeId} -- Edge identifier
+
+        Returns:
+            bool -- True if the edge is active
+                    False otherwise
+        """
+
+        return self.get_edge_type(edge_id) == 1
+
+    def get_active_edges(self):
+        return [e for e in self.get_elements() if self.is_active_edge(e)]
+
     def set_particle(self, id, new_val):
+        """Wrapper of set_edge_type
+
+        Arguments:
+            id {edgeId} -- Edge identifier
+            new_val int} -- New value
+        """
+
         self.set_edge_type(id, new_val)
 
     def set_edge_type(self, edge_id, new_val):
@@ -139,8 +174,9 @@ class GraphWrapper(object):
 
         try:
             val = int(new_val)
-        except:
-            raise TypeError()
+        except ValueError:
+            msg = "🤯 Edge Type must be an integer"
+            raise TypeError(msg)
 
         self._graph.nodes[edge_id]['type'] = val
 
@@ -153,7 +189,14 @@ class GraphWrapper(object):
         Returns:
             List[EdgeId] -- Neighbours
         """
-        neighs = [t for t in self._graph.neighbors(edge)]
-        res = [e for e in neighs if e > edge]
 
-        return res
+        # Returns only active edge in the neighborhood
+        neighs = [t for t in self._graph.neighbors(
+            edge) if self.is_active_edge(t)]
+
+        return neighs
+
+    def get_bridge_count(self, sample):
+        active_edges = self.get_active_edges()
+        degrees = dict(self._graph.degree(nbunch=active_edges)).values()
+        return sum(degrees / 2)
