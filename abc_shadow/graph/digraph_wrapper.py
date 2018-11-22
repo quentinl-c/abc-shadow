@@ -8,7 +8,8 @@ DEFAULT_DIM = 10
 class DiGraphWrapper(GraphWrapper):
 
     def __init__(self, dim=DEFAULT_DIM, gr=None):
-        super()
+
+        super().__init__(dim=None)
 
         if gr is None:
             # Generate a complete graph instead
@@ -109,10 +110,7 @@ def _lg_directed_in_in(G, create_using=None):
         (according to in-in neighbourhood).
 
     """
-    if create_using is None:
-        L = G.fresh_copy()
-    else:
-        L = create_using
+    L = nx.empty_graph(0, create_using, default=G.__class__)
 
     # Create a graph specific edge function.
     get_edges = _edge_func(G)
@@ -143,10 +141,7 @@ def _lg_directed_out_out(G, create_using=None):
         (according to out-out neighbourhood).
 
     """
-    if create_using is None:
-        L = G.fresh_copy()
-    else:
-        L = create_using
+    L = nx.empty_graph(0, create_using, default=G.__class__)
 
     # Create a graph specific edge function.
     get_edges = _edge_func(G)
