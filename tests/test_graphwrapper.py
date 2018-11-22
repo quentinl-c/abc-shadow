@@ -1,4 +1,4 @@
-import random
+import numpy as np
 
 import networkx as nx
 import pytest
@@ -6,6 +6,7 @@ import pytest
 from abc_shadow.graph.graph_wrapper import GraphWrapper
 
 DIM = 10
+RDN_NBR = 5
 
 """
 Fixtures
@@ -19,15 +20,23 @@ def get_graph_by_dim(request):
 
 
 @pytest.fixture
-def get_random_edge(get_graph_by_dim):
-    edges = get_graph_by_dim.get_elements()
-    random_edge = random.sample(list(iter(edges)), k=1)[0]
+def get_random_edge(request, get_graph_by_dim):
+    edges = list(get_graph_by_dim.get_elements())
+    random_edge = edges[np.random.choice(len(edges))]
     return random_edge
 
 
+@pytest.fixture(params=[RDN_NBR])
+def get_random_edges(request, get_graph_by_dim):
+    edges = list(get_graph_by_dim.get_elements())
+    random_indices = np.random.choice(len(edges), replace=False, size=RDN_NBR)
+    return [edges[i] for i in random_indices]
+
+
 @pytest.fixture
-def get_florentine_graph():
+def get_florentine_graph(request):
     return nx.florentine_families_graph()
+
 
 """
 Test cases
@@ -53,9 +62,30 @@ def test_graph_dim(get_graph_by_dim):
 
 
 def test_edge_attr(get_graph_by_dim, get_random_edge):
+    e = get_random_edge
     none_edge_count = get_graph_by_dim.get_none_edge_count()
-    get_graph_by_dim.set_edge_type(get_random_edge, 1)
+    get_graph_by_dim.set_edge_type(e, 1)
 
-    assert get_graph_by_dim.get_edge_type(get_random_edge) == 1
+    assert get_graph_by_dim.get_edge_type(e) == 1
     assert get_graph_by_dim.get_edge_count() == 1
     assert get_graph_by_dim.get_none_edge_count() == none_edge_count - 1
+
+
+def test_is_active_edge(get_graph_by_dim, get_random_edge):
+    e = get_random_edge
+    get_graph_by_dim.set_edge_type(e, 0)
+    assert not get_graph_by_dim.is_active_edge(e)
+
+    get_graph_by_dim.set_edge_type(e, 1)
+    assert get_graph_by_dim.is_active_edge(e)
+
+
+def test_get_active_edges(get_graph_by_dim, get_random_edges):
+    edges = get_random_edges
+    for e in edges:
+        get_graph_by_dim.set_edge_type(e, 1)
+
+    active_edges = get_graph_by_dim.get_active_edges()
+
+    assert len(active_edges) == len(edges)
+    assert sorted(active_edges) == sorted(edges)
