@@ -1,9 +1,6 @@
-import random
-from json import JSONEncoder
 from math import exp, sqrt
 
 import numpy as np
-import numpy.ma as ma
 from .model.graph_model import GraphModel
 from .graph.graph_wrapper import GraphWrapper
 from .sampler import mh_sampler
@@ -17,28 +14,31 @@ Implementation of ABC Shadow Algorithm
 def abc_shadow(model, theta_0, y, delta, n, size, iters,
                sampler=None, sampler_it=1, mask=None):
     """Executes ABC posterior sampling
-    
+
     Arguments:
         model {GraphModel | Model} -- Model encompassing phenomenon of nterest
-        theta_0 {[type]} -- Initial parameter (must match to model's parameters)
+        theta_0 {[type]} -- Initial parameter (must match to model's
+                            parameters)
         y {List[Sample]} -- Obseved sample(s)
         delta {List[float]} -- Bounds of proposal volumes for each parameter
         n {in} -- number of iteration for the shadow chain
-        size {int} -- Size of sample(s) sampled at initialisation of the shadow chain
+        size {int} -- Size of sample(s) sampled at initialisation
+                       of the shadow chain
         iters {int} -- Number of posterior samples
-    
+
     Keyword Arguments:
-        sampler {fct} -- Sampler function respeciting the following constraint on arguments 
+        sampler {fct} -- Sampler function respeciting the following constraint
+                         on arguments
                          args: model, size, it, seed=None
                          (default: {metropolis_hasting graph sampler})
         sampler_it {int} -- Number of sampler iteration  (default: {1})
-        mask {[type]} -- Mask array to fix some parameter (by setting 1 at the parameter position)
+        mask {[type]} -- Mask array to fix some parameter (by setting 1 at 
+                         the parameter position)
                          (default: {None})
-    
+
     Returns:
         List[np.array] -- List of sampled parameters -> posterior distribution
     """
-
 
     posteriors = list()
 
@@ -69,27 +69,30 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
 def abc_shadow_chain(model, theta_0, y, delta, n, size, sampler_it,
                      sampler=None, mask=None):
     """Executes ABC Shdow chain algorithm
-    
+
     Arguments:
         model {GraphModel | Model} -- Model encompassing phenomenon of nterest
-        theta_0 {[type]} -- Initial parameter (must match to model's parameters)
+        theta_0 {[type]} -- Initial parameter
+                            (must match to model's parameters)
         y {List[Sample]} -- Obseved sample(s)
         delta {List[float]} -- Bounds of proposal volumes for each parameter
         n {in} -- number of iteration for the shadow chain
-        size {int} -- Size of sample(s) sampled at initialisation of the shadow chain
+        size {int} -- Size of sample(s) sampled at initialisation
+                       of the shadow chain
         sampler_it {int} -- Number of sampler iteration
-  
+
     Keyword Arguments:
-       sampler {fct} -- Sampler function respeciting the following constraint on arguments 
+       sampler {fct} -- Sampler function respeciting the following constraint
+                         on arguments
                          args: model, size, it, seed=None
                          (default: {metropolis_hasting graph sampler})
-       mask {[type]} -- Mask array to fix some parameter (by setting 1 at the parameter position)
+       mask {[type]} -- Mask array to fix some parameter
+                         (by setting 1 at the parameter position)
                          (default: {None})
-    
+
     Returns:
         np.array -- Last accepted candidate parameter
     """
-
 
     model.set_params(*theta_0)
     theta_res = np.array(theta_0)
@@ -103,7 +106,7 @@ def abc_shadow_chain(model, theta_0, y, delta, n, size, sampler_it,
         candidate = get_candidate(theta_res, delta, mask)
         alpha = get_shadow_density_ratio(model, y, y_sim, theta_res, candidate)
 
-        prob = random.uniform(0, 1)
+        prob = np.random.uniform(0, 1)
 
         if alpha > prob:
             theta_res = candidate
@@ -142,14 +145,14 @@ def get_candidate(theta, delta, mask=None):
             err_msg = "🤯 mask array should have the same length as theta"
             raise ValueError(err_msg)
 
-        indices = set(range(len(theta))) - set(np.nonzero(mask)[0])
+        indices = list(set(range(len(theta))) - set(np.nonzero(mask)[0]))
     else:
         indices = range(len(theta))
 
     if not indices:
         return candidate_vector
 
-    candidate_indice = random.sample(indices, 1)[0]
+    candidate_indice = np.random.choice(indices)
 
     d = delta[candidate_indice]
     old = candidate_vector[candidate_indice]
@@ -174,6 +177,7 @@ def get_shadow_density_ratio(model, y_obs, y_sim, theta, candidate):
 
     return alpha
 
+
 """
 ===============
 Samplers
@@ -182,12 +186,10 @@ Samplers
 """
 
 
-def normal_sampler(model, size, it, seed=None):
+def normal_sampler(model, size, it):
     samples = list()
 
     for _ in range(it):
-        if seed is not None:
-            np.random.seed(seed)
 
         sample = np.random.normal(model.get_mean(),
                                   sqrt(model.get_var()), size)
@@ -197,15 +199,13 @@ def normal_sampler(model, size, it, seed=None):
     return np.array(y_sim)
 
 
-def binom_sampler(model, size, it, seed=None):
+def binom_sampler(model, size, it):
     samples = list()
     theta = model.get_theta()
     p = exp(theta) / (1 + exp(theta))
     n = model.get_n()
 
     for _ in range(it):
-        if seed is not None:
-            np.random.seed(seed)
 
         sample = np.random.binomial(n, p, size)
         samples.append(sample)
@@ -213,13 +213,14 @@ def binom_sampler(model, size, it, seed=None):
     y_sim = [np.average(stats) for stats in model.summary(samples).values()]
     return np.array(y_sim)
 
+
 """
 Graph Sampler
 """
 
 
 def metropolis_sampler(model, size, mh_sampler_it):
-    
+
     if isinstance(model, GraphModel):
         init_sample = GraphWrapper(size)
     else:
@@ -235,14 +236,8 @@ def metropolis_sampler(model, size, mh_sampler_it):
     return np.array(vec)
 
 
-def binom_graph_sampler(model, size, it, seed=None):
+def binom_graph_sampler(model, size, it):
     sample = GraphWrapper(size)
-
-    seeds = None
-    if seed is not None:
-        np.random.seed(seed)
-        size = it * len(sample.get_elements())
-        seeds = iter(np.random.random_integers(0, 1000, size=size))
 
     none_edge_param = model.get_none_edge_param()
     edge_param = model.get_edge_param()
@@ -255,16 +250,11 @@ def binom_graph_sampler(model, size, it, seed=None):
 
     for i in range(it):
         for edge in sample.get_elements():
-
-            if seeds is not None:
-                s = seeds.__next__()
-                np.random.seed(s)
-
-            edge_attr = np.random.choice(a=list(model.type_values),
-                                         size=1,
-                                         replace=False,
-                                         p=probs)
-            sample.set_edge_type(edge, edge_attr[0])
+            edge_attr = model.get_random_candidate_val(p=probs)
+            # edge_attr = np.random.choice(a=list(model.type_values),
+            #                              replace=False,
+            #                              p=probs)
+            sample.set_edge_type(edge, edge_attr)
 
         dist.append(copy.deepcopy(sample))
 
