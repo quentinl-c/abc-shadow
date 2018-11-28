@@ -50,7 +50,7 @@ class DiGraphWrapper(GraphWrapper):
         """
 
         bridges = 0
-        active_edges = self.get_active_edges()
+        active_edges = self.get_enabled_edges()
         edge_attr = nx.get_edge_attributes(self._graph, 'relation').items()
         for e, r_attr in edge_attr:
             if(r_attr == 'in-out' and e[0] in active_edges and
