@@ -1,7 +1,7 @@
 import copy
 import random
 from math import exp
-
+import numpy as np
 from .model.graph_model import GraphModel
 
 DEFAULT_ITER = 100
@@ -44,13 +44,13 @@ def mh_sampler(sample, model, iters=DEFAULT_ITER):
 
             delta = model.compute_delta(sample, e, new_val)
 
-            epsilon = random.uniform(0, 1)
+            epsilon = np.random.uniform(0, 1)
 
             if epsilon >= exp(delta):
-                #print('rejected {}'.format(new_val))
+                # print('rejected {}'.format(new_val))
                 # Old value recovery
                 sample.set_particle(e, old_val)
-            #else:
-                #print('Accepted {} -> {}'.format(old_val, new_val))
+            # else:
+                # print('Accepted {} -> {}'.format(old_val, new_val))
 
     return results
