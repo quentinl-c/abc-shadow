@@ -1,5 +1,6 @@
 import networkx as nx
 from collections.abc import Iterable
+from .utils import get_first_set_elmt, relabel_inv_line_graph
 
 DEFAULT_DIM = 10
 
@@ -71,6 +72,14 @@ class GraphWrapper(object):
 
         return self._graph
 
+    def get_initial_graph(self):
+        inv_line = nx.inverse_line_graph(self.get_graph())
+        origin = relabel_inv_line_graph(inv_line)
+
+        edges_to_rm = self.get_disabled_edges()
+        origin.remove_edges_from(edges_to_rm)
+        return origin
+
     def get_initial_dim(self):
         """Returns the dimension of the initial graph
 
@@ -97,9 +106,7 @@ class GraphWrapper(object):
             int -- number of directed 'edges'
         """
 
-        return len(
-            [e for e in nx.get_node_attributes(self._graph, 'type').values()
-                if e == 1])
+        return len(self.get_enabled_edges())
 
     def get_elements(self):
         """Get de list of line graph nodes
@@ -150,8 +157,14 @@ class GraphWrapper(object):
 
         return self.get_edge_type(edge_id) == 1
 
-    def get_active_edges(self):
+    def get_enabled_edges(self):
         return [e for e in self.get_elements() if self.is_active_edge(e)]
+
+    def get_enabled_graph(self):
+        return nx.subgraph(self._graph, nbunch=self.get_enabled_edges())
+
+    def get_disabled_edges(self):
+        return [e for e in self.get_elements() if not self.is_active_edge(e)]
 
     def set_particle(self, id, new_val):
         """Wrapper of set_edge_type
@@ -196,7 +209,35 @@ class GraphWrapper(object):
 
         return neighs
 
-    def get_bridge_count(self, sample):
-        active_edges = self.get_active_edges()
-        degrees = dict(self._graph.degree(nbunch=active_edges)).values()
-        return sum(degrees / 2)
+    def get_local_birdges_count(self, edge):
+        neighs = self.get_edge_neighbourhood(edge)
+        return len(neighs)
+
+    def get_bridges_count(self):
+        active_graph = self.get_enabled_graph()
+        two_star_count = len(active_graph.edges())
+        return two_star_count
+
+    def get_local_triangles_count(self, edge):
+        neighs = self.get_edge_neighbourhood(edge)
+
+        is_tuples_list = all(
+            [isinstance(n, Iterable) and len(n) == 2 for n in neighs])
+
+        if not is_tuples_list:
+            msg = "🤯 Edges must be formatted as follows : (node1, node2)"
+            raise TypeError(msg)
+
+        nodes = [get_first_set_elmt(set(n) - set(edge)) for n in neighs]
+        nodes_set = set(nodes)
+
+        return len(nodes) - len(nodes_set)
+
+    def get_triangles_count(self):
+        initial_graph = self.get_initial_graph()
+
+        # For each node, retrieve local triangles count -> list
+        triangles = nx.triangles(initial_graph).values()
+
+        triangles_count = sum(triangles) / 3
+        return triangles_count
