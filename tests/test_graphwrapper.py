@@ -71,7 +71,7 @@ def test_edge_attr(get_graph_by_dim, get_random_edge):
     assert get_graph_by_dim.get_none_edge_count() == none_edge_count - 1
 
 
-def test_is_active_edge(get_graph_by_dim, get_random_edge):
+def test_is_enabled_edge(get_graph_by_dim, get_random_edge):
     e = get_random_edge
     get_graph_by_dim.set_edge_type(e, 0)
     assert not get_graph_by_dim.is_active_edge(e)
@@ -80,12 +80,12 @@ def test_is_active_edge(get_graph_by_dim, get_random_edge):
     assert get_graph_by_dim.is_active_edge(e)
 
 
-def test_get_active_edges(get_graph_by_dim, get_random_edges):
+def test_get_enabled_edges(get_graph_by_dim, get_random_edges):
     edges = get_random_edges
     for e in edges:
         get_graph_by_dim.set_edge_type(e, 1)
 
-    active_edges = get_graph_by_dim.get_active_edges()
+    enabled_edges = get_graph_by_dim.get_enabled_edges()
 
-    assert len(active_edges) == len(edges)
-    assert sorted(active_edges) == sorted(edges)
+    assert len(enabled_edges) == len(edges)
+    assert sorted(enabled_edges) == sorted(edges)
