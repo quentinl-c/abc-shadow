@@ -40,7 +40,7 @@ def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
         for e in sample.get_elements():
 
             # Swap between old value and the new one (randomly taken)
-            old_val = sample.get_particle(e)
+            old_val = sample.get_edge_type(e)
             new_val = model.get_random_candidate_val()
             # new_val = 1
 

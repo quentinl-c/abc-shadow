@@ -1,6 +1,6 @@
 import networkx as nx
 from collections.abc import Iterable
-from .utils import get_first_set_elmt, relabel_inv_line_graph
+from .utils import relabel_inv_line_graph
 
 DEFAULT_DIM = 10
 
@@ -125,18 +125,6 @@ class GraphWrapper(object):
 
         return self._graph.nodes()
 
-    def get_particle(self, id):
-        """Wrapper of get_edge_type method
-
-        Arguments:
-            id {EdgeId} -- Edge identifier
-
-        Returns:
-            int -- Edge type
-        """
-
-        return self.get_edge_type(id)
-
     def get_edge_type(self, edge_id):
         """Given an edge id
         return its corresponding type
@@ -226,11 +214,6 @@ class GraphWrapper(object):
         d = enabled_edges / (enabled_edges + disabled_edges)
         return d
 
-    def get_two_star_count(self):
-        enabled_graph = self.get_enabled_graph()
-        two_star_count = len(enabled_graph.edges())
-        return two_star_count
-
     def get_edge_type_count(self, t):
         l_edges = [e for e in self.graph.nodes(data='type') if e[1] == t]
         return len(l_edges)
@@ -250,23 +233,11 @@ class GraphWrapper(object):
                 if t != 0 and t != ego_type:
                     count += 1
 
-        # Less efficient
-        # enabled_graph = self.get_enabled_edges()
-        # count = 0
-
-        # for e in enabled_graph:
-        #     count += self.get_local_diff_type_count(e)
-
         return count / 2
 
-    def get_heffect_count(self):
-        pass
     ##############################################################
     # Local statistics
     ##############################################################
-
-    def get_local_heffect(self, edge):
-        self._graph.neighbors(edge)
 
     def get_local_diff_type_count(self, edge):
         ego_type = self.get_edge_type(edge)
@@ -283,31 +254,3 @@ class GraphWrapper(object):
                 count += 1
 
         return count
-
-    def get_local_birdges_count(self, edge):
-        neighs = self.get_edge_neighbourhood(edge)
-        return len(neighs)
-
-    def get_local_triangles_count(self, edge):
-        neighs = self.get_edge_neighbourhood(edge)
-
-        is_tuples_list = all(
-            [isinstance(n, Iterable) and len(n) == 2 for n in neighs])
-
-        if not is_tuples_list:
-            msg = "🤯 Edges must be formatted as follows : (node1, node2)"
-            raise TypeError(msg)
-
-        nodes = [get_first_set_elmt(set(n) - set(edge)) for n in neighs]
-        nodes_set = set(nodes)
-
-        return len(nodes) - len(nodes_set)
-
-    def get_triangles_count(self):
-        initial_graph = self.get_initial_graph()
-
-        # For each node, retrieve local triangles count -> list
-        triangles = nx.triangles(initial_graph).values()
-
-        triangles_count = sum(triangles) / 3
-        return triangles_count

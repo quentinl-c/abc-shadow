@@ -2,7 +2,6 @@ from abc_shadow.graph.graph_wrapper import GraphWrapper
 from abc_shadow.sampler import mcmc_sampler
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 from abc_shadow.model.binomial_edge_graph_model import BinomialEdgeGraphModel
-from abc_shadow.model.markov_star_graph_model import MarkovStarGraphModel
 from abc_shadow.utils import dist_display, display
 from abc_shadow.abc_impl import binom_graph_sampler
 from abc_shadow.model.two_interactions_graph_model import TwoInteractionsGraphModel
@@ -16,7 +15,6 @@ def main():
 
     # m = BinomialEdgeGraphModel(-2.197224577336219)
     m = TwoInteractionsGraphModel(2.09275698,  1.87109988, -0.04888886)
-    # m = MarkovStarGraphModel(-1.649619, 0.007925)
     g = GraphWrapper(10)
 
     start = time.time()
