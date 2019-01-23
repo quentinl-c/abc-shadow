@@ -20,7 +20,7 @@ def main():
     """
 
     seed = 2018
-    theta = - 10
+    theta = 0
     n_p = 100  # fixed
     theta_perfect = np.array([theta])
 
@@ -28,7 +28,8 @@ def main():
     model = BinomialModel(n_p, theta_perfect[0])
     size = 1
 
-    y_obs = binom_sampler(model, size, 1, seed=seed)
+    np.random.seed(seed)
+    y_obs = binom_sampler(model, size, 1)
 
     # ABC Shadow parameters
 
@@ -36,7 +37,7 @@ def main():
     n = 100
 
     # Number of generated samples
-    iters = 10000
+    iters = 100000
 
     # Delta -> Bounds of proposal volume
     delta = np.array([0.05])
@@ -54,9 +55,8 @@ def main():
     json_list = [post.tolist() if isinstance(post, np.ndarray)
                  else post for post in posteriors]
 
-    with open('binom.json', 'w') as output_file:
+    with open('binom_abc_100000.json', 'w') as output_file:
         output_file.truncate()
-        output_file.writelines(["test"])
         json.dump(json_list, output_file)
 
     print("🎉 🎉 🎉 END 🎉 🎉 🎉!")

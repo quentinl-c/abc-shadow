@@ -3,7 +3,7 @@ from math import exp, sqrt
 import numpy as np
 from .model.graph_model import GraphModel
 from .graph.graph_wrapper import GraphWrapper
-from .sampler import mh_sampler
+from .sampler import mcmc_sampler
 import copy
 
 """
@@ -45,7 +45,12 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
     theta_res = theta_0
     posteriors.append(theta_res)
 
-    for i in range(iters):
+    for i in range(iters - 1):
+        if i % 10 == 0:
+            msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
+                i, iters, n, sampler_it, theta_res)
+            print(msg)
+
         theta_res = abc_shadow_chain(model,
                                      theta_res,
                                      y,
@@ -57,11 +62,6 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
                                      mask=mask)
 
         posteriors.append(theta_res)
-
-        if i % 10 == 0:
-            msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
-                i, iters, n, sampler_it, theta_res)
-            print(msg)
 
     return posteriors
 
@@ -201,9 +201,9 @@ def normal_sampler(model, size, it):
 
 def binom_sampler(model, size, it):
     samples = list()
-    theta = model.get_theta()
+    theta = model.theta
     p = exp(theta) / (1 + exp(theta))
-    n = model.get_n()
+    n = model.n
 
     for _ in range(it):
 
@@ -228,7 +228,7 @@ def metropolis_sampler(model, size, mh_sampler_it):
                   "to sample graph"
         raise ValueError(err_msg)
 
-    samples = mh_sampler(init_sample, model, mh_sampler_it)
+    samples = mcmc_sampler(init_sample, model, mh_sampler_it)
 
     summary = model.summary(samples)
 
@@ -239,8 +239,8 @@ def metropolis_sampler(model, size, mh_sampler_it):
 def binom_graph_sampler(model, size, it):
     sample = GraphWrapper(size)
 
-    none_edge_param = model.get_none_edge_param()
-    edge_param = model.get_edge_param()
+    none_edge_param = model.none_edge_param
+    edge_param = model.edge_param
 
     none_edge_prob = none_edge_param / (edge_param + none_edge_param)
     edge_prob = edge_param / (edge_param + none_edge_param)

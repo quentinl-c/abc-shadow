@@ -63,7 +63,16 @@ class GraphWrapper(object):
 
                 self._graph = graph
 
-    def get_graph(self):
+    def copy(self):
+        copy = GraphWrapper(dim=None)
+        copy._set_graph(self._graph.copy())
+        return copy
+
+    def _set_graph(self, new_gr):
+        self._graph = new_gr
+
+    @property
+    def graph(self):
         """Returns the Networkx graph corresponding to the graph model
 
         Returns:
@@ -73,7 +82,7 @@ class GraphWrapper(object):
         return self._graph
 
     def get_initial_graph(self):
-        inv_line = nx.inverse_line_graph(self.get_graph())
+        inv_line = nx.inverse_line_graph(self.graph)
         origin = relabel_inv_line_graph(inv_line)
 
         edges_to_rm = self.get_disabled_edges()
@@ -95,9 +104,7 @@ class GraphWrapper(object):
         Returns:
             int -- number of none 'edges'
         """
-        return len(
-            [e for e in nx.get_node_attributes(self._graph, 'type').values()
-                if e == 0])
+        return len(self.get_disabled_edges())
 
     def get_edge_count(self):
         """Return the number of nodes labelled as directed edge / edge
@@ -144,7 +151,7 @@ class GraphWrapper(object):
 
     def is_active_edge(self, edge_id):
         """Returns True if the edge referred by edge_id
-        is active (i.e. edge_type == 1)
+        is active (i.e. edge_type != 0)
         False otherwise
 
         Arguments:
@@ -154,8 +161,7 @@ class GraphWrapper(object):
             bool -- True if the edge is active
                     False otherwise
         """
-
-        return self.get_edge_type(edge_id) == 1
+        return self.get_edge_type(edge_id) != 0
 
     def get_enabled_edges(self):
         return [e for e in self.get_elements() if self.is_active_edge(e)]
@@ -195,6 +201,7 @@ class GraphWrapper(object):
 
     def get_edge_neighbourhood(self, edge):
         """Get the neighbourhood of the edge
+        All enabled edges connected to 'edge'
 
         Arguments:
             edge {edgeId} -- Edge identfier
@@ -209,14 +216,77 @@ class GraphWrapper(object):
 
         return neighs
 
+    def get_density(self):
+        enabled_edges = len(self.get_enabled_edges())
+        disabled_edges = len(self.get_disabled_edges())
+
+        if enabled_edges < 0 and disabled_edges < 0:
+            return 0
+
+        d = enabled_edges / (enabled_edges + disabled_edges)
+        return d
+
+    def get_two_star_count(self):
+        enabled_graph = self.get_enabled_graph()
+        two_star_count = len(enabled_graph.edges())
+        return two_star_count
+
+    def get_edge_type_count(self, t):
+        l_edges = [e for e in self.graph.nodes(data='type') if e[1] == t]
+        return len(l_edges)
+
+    def get_diff_type_count(self):
+        count = 0
+
+        enabled_graph = self.get_enabled_edges()
+        labels = nx.get_node_attributes(self.graph, 'type')
+
+        for e in enabled_graph:
+
+            ego_type = labels[e]
+            neigh_labels = [labels[n] for n in self.graph.neighbors(e)]
+
+            for t in neigh_labels:
+                if t != 0 and t != ego_type:
+                    count += 1
+
+        # Less efficient
+        # enabled_graph = self.get_enabled_edges()
+        # count = 0
+
+        # for e in enabled_graph:
+        #     count += self.get_local_diff_type_count(e)
+
+        return count / 2
+
+    def get_heffect_count(self):
+        pass
+    ##############################################################
+    # Local statistics
+    ##############################################################
+
+    def get_local_heffect(self, edge):
+        self._graph.neighbors(edge)
+
+    def get_local_diff_type_count(self, edge):
+        ego_type = self.get_edge_type(edge)
+
+        if not ego_type:
+            return 0
+
+        neighs = self._graph.neighbors(edge)
+        # self.get_edge_neighbourhood(edge)
+        count = 0
+        neigh_labels = [self.get_edge_type(n) for n in neighs]
+        for t in neigh_labels:
+            if t != 0 and t != ego_type:
+                count += 1
+
+        return count
+
     def get_local_birdges_count(self, edge):
         neighs = self.get_edge_neighbourhood(edge)
         return len(neighs)
-
-    def get_bridges_count(self):
-        active_graph = self.get_enabled_graph()
-        two_star_count = len(active_graph.edges())
-        return two_star_count
 
     def get_local_triangles_count(self, edge):
         neighs = self.get_edge_neighbourhood(edge)

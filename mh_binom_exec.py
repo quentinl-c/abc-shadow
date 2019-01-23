@@ -20,14 +20,14 @@ def main():
     """
 
     seed = 2018
-    theta = 0.2
+    theta = 0
     theta_0 = 10
     p = exp(theta) / (1 + exp(theta))
     p_0 = exp(theta_0) / (1 + exp(theta_0))
     n_p = 100 # fixed
-
     theta_0 = np.array([n_p, p_0])
-
+    print(theta_0)
+    print(p)
     size = 1
 
     np.random.seed(seed)
@@ -36,10 +36,10 @@ def main():
     # ABC Shadow parameters
 
     # Number of iterations in the shadow chain
-    n = 200
+    n = 100
 
     # Number of generated samples
-    iters = 10000
+    iters = 100000
 
     # Delta -> Bounds of proposal volume
     delta = np.array([0.005, 0.005])
@@ -50,7 +50,7 @@ def main():
     json_list = [post.tolist() if isinstance(post, np.ndarray)
                  else post for post in posteriors]
 
-    with open('binom_mh.json', 'w') as output_file:
+    with open('binom_mh_100000.json', 'w') as output_file:
         output_file.truncate()
         json.dump(json_list, output_file)
 

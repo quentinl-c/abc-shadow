@@ -1,15 +1,13 @@
 import numpy.random as random
-from .graph_model import GraphModel
+from .binomial_edge_graph_model import BinomialEdgeGraphModel
 
 
-class BinomialGraphModel(GraphModel):
+class BinomialGraphModel(BinomialEdgeGraphModel):
     """
     type_value is related to the different edge types
     - 0 : edge doesn't exist (no edge)
     - 1 : edge
     """
-
-    type_values = {0, 1}
 
     def __init__(self, none_edge_param, edge_param):
         """Initialize Bernouilli (Edge
@@ -17,24 +15,27 @@ class BinomialGraphModel(GraphModel):
         Keyword Arguments:
             edge_param {float} -- value of edge parameter
         """
+        super().__init__(edge_param)
         self._none_edge_param = none_edge_param
-        self._edge_param = edge_param
 
-    def set_none_edge_param(self, new_val):
+    @property
+    def none_edge_param(self):
+        """Get edge parameter
+
+        Returns:
+            float -- Edge parameter
+        """
+
+        return self._none_edge_param
+
+    @none_edge_param.setter
+    def none_edge_param(self, new_val):
         """Set _none_edge_param instance variable
 
         Arguments:
             new_val {int} -- new value
         """
         self._none_edge_param = new_val
-
-    def set_edge_param(self, new_val):
-        """Set _edge_param instance variable
-
-        Arguments:
-            new_val {int} -- new value
-        """
-        self._edge_param = new_val
 
     def set_params(self, *args):
         """Set all parameter values belonging to the model
@@ -50,26 +51,8 @@ class BinomialGraphModel(GraphModel):
         if len(args) < 2:
             raise ValueError
 
-        self.set_none_edge_param(args[0])
-        self.set_edge_param(args[1])
-
-    def get_none_edge_param(self):
-        """Get edge parameter
-
-        Returns:
-            float -- Edge parameter
-        """
-
-        return self._none_edge_param
-
-    def get_edge_param(self):
-        """Get edge parameter
-
-        Returns:
-            float -- Edge parameter
-        """
-
-        return self._edge_param
+        super().set_params(args[1])
+        self.none_edge_param = args[0]
 
     def evaluate(self, sample):
         """Given a graph (sample),
@@ -82,10 +65,11 @@ class BinomialGraphModel(GraphModel):
             float -- resulting energy
         """
 
-        return (self._none_edge_param * sample.get_none_edge_count() +
-                self._edge_param * sample.get_edge_count())
+        res = super().evaluate(sample)
+        res += self._none_edge_param * sample.get_none_edge_count()
+        return res
 
-    def edge_delta(self, sample, edge):
+    def get_local_energy(self, sample, edge, neigh=None):
         """Compute the energy delta regarding
         edge and none edge part.
 
@@ -96,45 +80,15 @@ class BinomialGraphModel(GraphModel):
         Returns:
             float -- Delta energy regarding edge and dyad parts
         """
-        ego_type = sample.get_edge_type(edge)
 
-        res = 0
-        if ego_type == 0:
-            res = self._none_edge_param
-        if ego_type == 1:
-            res = self._edge_param
+        res = super().get_local_energy(sample, edge)
+
+        edge_type = sample.get_edge_type(edge)
+
+        if edge_type == 0:
+            res += self._none_edge_param
 
         return res
-
-    def compute_delta(self, mut_sample, edge, new_val):
-        """Given a graph sample (mut_sample), an edge on which we will
-        affect the new attribute value (new_val),
-        computes difference between the new energy (on the modified sample)
-        and the previous one (on the initial sample).
-        Instead of counting all directe edges,
-        computes only the difference between x_new - x_old
-
-        Arguments:
-            mut_sample {GraphWrapper} -- initial sample
-                                         (mutable - reference passing)
-                                         by side effect, one will be modified
-            edge {tuple(int,int)} -- designated edge
-                                     (for which the attribute will be modified)
-            new_val {int} -- new attribute value comprise
-
-        Returns:
-            float -- Energy delta between modified sample and initial one
-        """
-
-        old_energy = self.edge_delta(mut_sample, edge)
-
-        mut_sample.set_edge_type(edge, new_val)
-
-        # Computes the delta between old and new energy
-        new_energy = self.edge_delta(mut_sample, edge)
-        delta = new_energy - old_energy
-
-        return delta
 
     def evaluate_from_stats(self, *args):
         """Evaluate the energy (U) from sufficient statistics passed in argument
@@ -149,14 +103,10 @@ class BinomialGraphModel(GraphModel):
         if len(args) < 2:
             raise ValueError
 
-        edge_side = self._none_edge_param * args[0]
-        edge_side += self._edge_param * args[1]
+        res = super().evaluate_from_stats(args[1])
+        res += self._none_edge_param * args[0]
 
-        return edge_side
-
-    @classmethod
-    def get_random_candidate_val(cls):
-        return random.choice(list(cls.type_values), 1)[0]
+        return res
 
     @staticmethod
     def summary(results):
@@ -170,7 +120,7 @@ class BinomialGraphModel(GraphModel):
         """
 
         dataset = dict()
-        dataset['None edges counts'] = [g.get_none_edge_count()
+        dataset["None edges counts"] = [g.get_none_edge_count()
                                         for g in results]
-        dataset['Edges counts'] = [g.get_edge_count() for g in results]
+        dataset["Edges counts"] = [g.get_edge_count() for g in results]
         return dataset
