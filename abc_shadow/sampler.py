@@ -1,5 +1,4 @@
 import copy
-import random
 from math import exp
 import numpy as np
 from .model.graph_model import GraphModel
@@ -7,7 +6,7 @@ from .model.graph_model import GraphModel
 DEFAULT_ITER = 100
 
 
-def mh_sampler(sample, model, iters=DEFAULT_ITER):
+def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
     """Executes Metropolis Hasting sampler algorith
 
     Arguments:
@@ -31,8 +30,11 @@ def mh_sampler(sample, model, iters=DEFAULT_ITER):
 
     # resulting list
     results = list()
-    for _ in range(iters):
-        results.append(copy.deepcopy(sample))
+    # rejected = 0
+    # accepted = 0
+    for i in range(burnin + by * iters):
+        if i >= burnin and i % by == 0:
+            results.append(sample.copy())
 
         # print("Iteration {}".format(it))
         for e in sample.get_elements():
@@ -47,10 +49,15 @@ def mh_sampler(sample, model, iters=DEFAULT_ITER):
             epsilon = np.random.uniform(0, 1)
 
             if epsilon >= exp(delta):
+                # rejected += 1
                 # print('rejected {}'.format(new_val))
                 # Old value recovery
                 sample.set_particle(e, old_val)
-            # else:
-                # print('Accepted {} -> {}'.format(old_val, new_val))
+    #         else:
+    #             accepted += 1
+    #             # print('Accepted {} -> {}'.format(old_val, new_val))
+    # print("Number of rejected proposals: {}".format(rejected))
+    # print("Number of accepted proposals: {}".format(accepted))
+    # print("ratio accepted / rejected: {}".format(accepted / rejected))
 
     return results

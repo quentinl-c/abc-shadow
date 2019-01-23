@@ -1,6 +1,5 @@
 import numpy as np
-import random
-from math import exp, pi, factorial
+from math import exp, factorial
 
 from .abc_impl import get_candidate
 
@@ -11,8 +10,8 @@ def mh_post_sampler(theta_0, y, delta, n, iters, ratio_fctn, mask=None):
     theta_res = theta_0
     posteriors.append(theta_res)
 
-    for i in range(iters):
-        if i % 10 == 0:
+    for i in range(iters - 1):
+        if i % 1000 == 0:
             msg = "🔎  Iteration {} / {} n : {} theta {}".format(
                 i, iters, n, theta_res)
             print(msg)
@@ -29,7 +28,7 @@ def mh_algo(theta_0, y, delta, n, ratio_fctn, mask=None):
     for _ in range(n):
         candidate = get_candidate(theta_res, delta, mask)
         density_ratio = ratio_fctn(y, theta_res, candidate)
-        prob = random.uniform(0, 1)
+        prob = np.random.uniform(0, 1)
 
         if prob < density_ratio:
             theta_res = candidate

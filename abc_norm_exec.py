@@ -26,11 +26,12 @@ def main():
     var = 9
     theta_perfect = np.array([mean, var])
 
-    theta_0 = np.array([10, 10])
+    theta_0 = np.array([10, 17])
     model = NormModel(theta_perfect[0], theta_perfect[1])
-    size = 1000
+    size = 100
 
-    y_obs = normal_sampler(model, size, 1, seed=seed)
+    np.random.seed(seed)
+    y_obs = normal_sampler(model, size, 1)
 
     # ABC Shadow parameters
 
@@ -38,7 +39,7 @@ def main():
     n = 200
 
     # Number of generated samples
-    iters = 1000
+    iters = 100000
 
     # Delta -> Bounds of proposal volume
     delta = np.array([0.05, 0.05])
@@ -56,7 +57,7 @@ def main():
     json_list = [post.tolist() if isinstance(post, np.ndarray)
                  else post for post in posteriors]
 
-    with open('norm.json', 'w') as output_file:
+    with open('norm_abc_100000.json', 'w') as output_file:
         output_file.truncate()
         json.dump(json_list, output_file)
 

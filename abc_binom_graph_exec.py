@@ -2,7 +2,9 @@ import json
 
 import numpy as np
 
-from abc_shadow.abc_impl import abc_shadow, binom_graph_sampler, metropolis_sampler
+from abc_shadow.abc_impl import (abc_shadow,
+                                 metropolis_sampler)
+
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 
 
@@ -33,27 +35,27 @@ def main():
 
     # sampler = binom_graph_sampler
     sampler = metropolis_sampler
-    
+
     theta_perfect = np.array([none_edge_param, edge_param])
 
     theta_0 = np.array([none_edge_param, 20])
     model = BinomialGraphModel(theta_perfect[0], theta_perfect[1])
     size = 10
 
+    np.random.seed(seed)
     y_obs = sampler(model, size, 100)
     # y_obs = metropolis_sampler(model, size, 100)
 
     # ABC Shadow parameters
 
-
     # Number of iterations in the shadow chain
     n = 100
 
     # Number of generated samples
-    iters = 5000
+    iters = 100000
 
     # Delta -> Bounds of proposal volume
-    delta = np.array([0.1, 0.1])
+    delta = np.array([0.05, 0.05])
 
     model.set_params(*theta_0)
     posteriors = abc_shadow(model,
@@ -75,6 +77,7 @@ def main():
         json.dump(json_list, output_file)
 
     print("🎉 🎉 🎉 END 🎉 🎉 🎉!")
+
 
 if __name__ == '__main__':
     main()
