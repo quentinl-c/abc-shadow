@@ -9,4 +9,3 @@ from .fixtures.graph_fixtures import (get_dim, get_empty_graph,
                                       get_random_disct_edge_couple,
                                       get_random_edge, get_random_edges,
                                       get_rdn_size)
-from .fixtures.markov_star_model_fixtures import get_empty_markov_star_model

@@ -14,7 +14,6 @@ from abc_shadow.mh_impl import binom_ratio, mh_post_sampler, norm_ratio
 from abc_shadow.model.binomial_edge_graph_model import BinomialEdgeGraphModel
 from abc_shadow.model.binomial_model import BinomialModel
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
-from abc_shadow.model.markov_star_graph_model import MarkovStarGraphModel
 from abc_shadow.model.norm_model import NormModel
 
 ALGOS = ['abc_shadow', 'metropolis_hasting']
@@ -22,8 +21,7 @@ ALGOS = ['abc_shadow', 'metropolis_hasting']
 MODELS = ['normal',
           'binomial',
           'binomial_edge_graph',
-          'binomial_graph',
-          'markov_2star_graph']
+          'binomial_graph']
 
 
 def main():
@@ -89,9 +87,6 @@ def main():
 
         elif arguments.model == 'binomial_graph':
             model = BinomialGraphModel(*theta_perfect)
-
-        elif arguments.model == 'markov_2star_graph':
-            model = MarkovStarGraphModel(*theta_perfect)    
 
         else:
             err = "Unknown model: {}".format(arguments.model)
