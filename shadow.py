@@ -4,7 +4,7 @@ import configparser
 import json
 import os
 import time
-from math import sqrt, exp
+from math import exp, sqrt
 
 import numpy as np
 
@@ -12,16 +12,19 @@ from abc_shadow.abc_impl import (abc_shadow, binom_sampler, metropolis_sampler,
                                  normal_sampler)
 from abc_shadow.mh_impl import binom_ratio, mh_post_sampler, norm_ratio
 from abc_shadow.model.binomial_edge_graph_model import BinomialEdgeGraphModel
-from abc_shadow.model.binomial_model import BinomialModel
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
+from abc_shadow.model.binomial_model import BinomialModel
 from abc_shadow.model.norm_model import NormModel
+from abc_shadow.model.two_interactions_graph_model import \
+    TwoInteractionsGraphModel
 
 ALGOS = ['abc_shadow', 'metropolis_hasting']
 
 MODELS = ['normal',
           'binomial',
           'binomial_edge_graph',
-          'binomial_graph']
+          'binomial_graph',
+          '2_interactions']
 
 
 def main():
@@ -88,6 +91,9 @@ def main():
         elif arguments.model == 'binomial_graph':
             model = BinomialGraphModel(*theta_perfect)
 
+        elif arguments.model == '2_interactions':
+            model = TwoInteractionsGraphModel(*theta_perfect)
+
         else:
             err = "Unknown model: {}".format(arguments.model)
             raise ValueError(err)
@@ -130,7 +136,7 @@ def main():
         print("DURANTION : {}".format(end_time - start_time))
 
     elif arguments.algo == 'metropolis_hasting':
-        print("🤓 Metropolis Hasting")
+        print("🚂 🚂 🚂 Metropolis Hasting Sampling 🚂 🚂 🚂 ")
 
         mask = config_model.get('mask')
 
@@ -174,7 +180,7 @@ def main():
         err = 'Given estimation algorithm {} not known'.format(arguments.algo)
         raise ValueError(err)
 
-    print("💾 Save Record ... ")
+    print("💾  Save Record ... ")
     record = dict()
     record['algo'] = arguments.algo
     record['model'] = arguments.model
