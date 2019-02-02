@@ -189,7 +189,7 @@ class GraphWrapper(object):
 
     def get_edge_neighbourhood(self, edge):
         """Get the neighbourhood of the edge
-        All enabled edges connected to 'edge'
+        All edges connected to 'edge'
 
         Arguments:
             edge {edgeId} -- Edge identfier
@@ -199,8 +199,7 @@ class GraphWrapper(object):
         """
 
         # Returns only active edge in the neighborhood
-        neighs = [t for t in self._graph.neighbors(
-            edge) if self.is_active_edge(t)]
+        neighs = [t for t in self._graph.neighbors(edge)]
 
         return neighs
 
