@@ -42,6 +42,7 @@ class GraphModel(ABC):
         Returns:
             float -- Energy delta between modified sample and initial one
         """
+        # neigh = [mut_sample.vertex[n] for n in mut_sample.get_edge_neighbourhood(edge)]
         neigh = mut_sample.get_edge_neighbourhood(edge)
         old_energy = self.get_local_energy(mut_sample, edge, neigh=neigh)
 

@@ -92,9 +92,9 @@ class TwoInteractionsGraphModel(GraphModel):
             res = self._l2
 
         count = 0
-
         for t in neigh:
-            if t != 0 and t != edge_type:
+            n_label = sample.vertex[t]
+            if n_label != 0 and n_label != edge_type:
                 count += 1
 
         res += self._l12 * count
@@ -108,4 +108,5 @@ class TwoInteractionsGraphModel(GraphModel):
         data['l1'] = [g.get_edge_type_count(1) for g in results]
         data['l2'] = [g.get_edge_type_count(2) for g in results]
         data['l12'] = [g.get_diff_type_count() for g in results]
+
         return data
