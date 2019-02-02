@@ -21,7 +21,7 @@ def test_graph_creation_from_graph(get_florentine_graph):
                               for key, val in nx.get_edge_attributes(
         get_florentine_graph, 'type').items()})
 
-    edge_attr = set(nx.get_node_attributes(graphwrapper.graph, 'type'))
+    edge_attr = set(graphwrapper.vertex)
     assert edge_attr == edge_attr_expected
 
 
@@ -117,7 +117,7 @@ def test_get_local_diff_type_count(get_empty_graph, get_random_edge):
     gr = get_empty_graph
     ego = get_random_edge
 
-    neigh = list(gr.graph.neighbors(ego))
+    neigh = list(gr.get_edge_neighbourhood(ego))
 
     ego_type = 1
     gr.set_edge_type(ego, ego_type)
