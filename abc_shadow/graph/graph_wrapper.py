@@ -67,7 +67,7 @@ class GraphWrapper(object):
                 self._vertex = nx.get_node_attributes(graph, 'type')
 
     def copy(self):
-        copy = OptimizedGraphWrapper(dim=None)
+        copy = GraphWrapper(dim=None)
         copy.graph = self.graph
         copy.vertex = self.vertex.copy()
         return copy
