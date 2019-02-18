@@ -6,7 +6,7 @@ from .model.graph_model import GraphModel
 DEFAULT_ITER = 100
 
 
-def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
+def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=0, by=1):
     """Executes Metropolis Hasting sampler algorith
 
     Arguments:
@@ -30,34 +30,21 @@ def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
 
     # resulting list
     results = list()
-    # rejected = 0
-    # accepted = 0
-    for i in range(burnin + by * iters):
+    for i in range(iters):
+    # for i in range(burnin + by * iters):
         if i >= burnin and i % by == 0:
             results.append(sample.copy())
 
         # print("Iteration {}".format(it))
         for e in sample.get_elements():
 
-            # Swap between old value and the new one (randomly taken)
             old_val = sample.get_edge_type(e)
+            # Naw random val is choosed
             new_val = model.get_random_candidate_val()
-            # new_val = 1
-
             delta = model.compute_delta(sample, e, new_val)
-
             epsilon = np.random.uniform(0, 1)
-
             if epsilon >= exp(delta):
-                # rejected += 1
-                # print('rejected {}'.format(new_val))
-                # Old value recovery
-                sample.set_particle(e, old_val)
-    #         else:
-    #             accepted += 1
-    #             # print('Accepted {} -> {}'.format(old_val, new_val))
-    # print("Number of rejected proposals: {}".format(rejected))
-    # print("Number of accepted proposals: {}".format(accepted))
-    # print("ratio accepted / rejected: {}".format(accepted / rejected))
+                # Rejected
+                sample.set_edge_type(e, old_val)
 
     return results

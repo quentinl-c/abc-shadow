@@ -3,11 +3,12 @@ from collections.abc import Iterable
 from .utils import relabel_inv_line_graph
 
 DEFAULT_DIM = 10
+DEFAULT_LABEL = 0
 
 
 class GraphWrapper(object):
 
-    def __init__(self, dim=DEFAULT_DIM, gr=None):
+    def __init__(self, dim=DEFAULT_DIM, gr=None, default_label=DEFAULT_LABEL):
         """Initialize Graph Wrapper object
         This is a wrapper over a networkx graph
 
@@ -33,7 +34,7 @@ class GraphWrapper(object):
                 # Generate a complete graph instead
                 intermed_graph = nx.complete_graph(dim)
                 graph = nx.line_graph(intermed_graph)
-                nx.set_node_attributes(graph, 0, 'type')
+                nx.set_node_attributes(graph, default_label, 'type')
 
                 self._graph = nx.to_dict_of_lists(graph)
                 self._vertex = nx.get_node_attributes(graph, 'type')
@@ -49,7 +50,7 @@ class GraphWrapper(object):
                 compl_graph = nx.complement(graph)
                 nx.set_edge_attributes(graph, 1, 'type')
 
-                graph.add_edges_from(compl_graph.edges(), type=0)
+                graph.add_edges_from(compl_graph.edges(), type=default_label)
 
                 attr = nx.get_edge_attributes(graph, 'type')
 

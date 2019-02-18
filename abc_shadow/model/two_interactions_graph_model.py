@@ -5,10 +5,15 @@ class TwoInteractionsGraphModel(GraphModel):
 
     type_values = {0, 1, 2}
 
-    def __init__(self, l1, l2, l12):
+    def __init__(self, l0, l1, l2, l12):
+        self._l0 = l0
         self._l1 = l1
         self._l2 = l2
         self._l12 = l12
+
+    @property
+    def l0(self):
+        return self._l0
 
     @property
     def l1(self):
@@ -21,6 +26,10 @@ class TwoInteractionsGraphModel(GraphModel):
     @property
     def l12(self):
         return self._l12
+
+    @l0.setter
+    def l0(self, l0_new):
+        self._l0 = l0_new
 
     @l1.setter
     def l1(self, l1_new):
@@ -36,21 +45,22 @@ class TwoInteractionsGraphModel(GraphModel):
 
     def set_params(self, *args):
 
-        if len(args) < 3:
+        if len(args) < 4:
             raise ValueError
-
-        self.l1 = args[0]
-        self.l2 = args[1]
-        self.l12 = args[2]
+        self.l0 = args[0]
+        self.l1 = args[1]
+        self.l2 = args[2]
+        self.l12 = args[3]
 
     def evaluate_from_stats(self, *args):
 
-        if len(args) < 3:
+        if len(args) < 4:
             raise ValueError
 
-        u = self._l1 * args[0]
-        u += self._l2 * args[1]
-        u += self._l12 * args[2]
+        u = self.l0 * args[0]
+        u += self.l1 * args[1]
+        u += self.l2 * args[2]
+        u += self.l12 * args[3]
 
         return u
 
@@ -64,9 +74,10 @@ class TwoInteractionsGraphModel(GraphModel):
         Returns:
             float -- resulting energy
         """
-        u = self._l1 * sample.get_edge_type_count(1)
-        u += self._l2 * sample.get_edge_type_count(2)
-        u += self._l12 * sample.get_diff_type_count()
+        u = self.l0 * sample.get_edge_count()
+        u += self.l1 * sample.get_edge_type_count(1)
+        u += self.l2 * sample.get_edge_type_count(2)
+        u += self.l12 * sample.get_diff_type_count()
 
         return u
 
@@ -86,10 +97,12 @@ class TwoInteractionsGraphModel(GraphModel):
         if edge_type == 0:
             return 0
 
+        res = self.l0
+
         if edge_type == 1:
-            res = self._l1
+            res += self.l1
         elif edge_type == 2:
-            res = self._l2
+            res += self.l2
 
         count = 0
         for t in neigh:
@@ -97,7 +110,7 @@ class TwoInteractionsGraphModel(GraphModel):
             if n_label != 0 and n_label != edge_type:
                 count += 1
 
-        res += self._l12 * count
+        res += self.l12 * count
         # if edge_type == 1:
         #     print(edge_type, res)
         return res
@@ -105,6 +118,8 @@ class TwoInteractionsGraphModel(GraphModel):
     @staticmethod
     def summary(results):
         data = dict()
+        data['l0'] = [g.get_edge_count() for g in results]
+        # data['-l0'] = [g.get_none_edge_count() for g in results]
         data['l1'] = [g.get_edge_type_count(1) for g in results]
         data['l2'] = [g.get_edge_type_count(2) for g in results]
         data['l12'] = [g.get_diff_type_count() for g in results]

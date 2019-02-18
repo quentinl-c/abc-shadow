@@ -55,18 +55,6 @@ def get_one_edge_enabled_graph(request, get_dim):
 
 
 @pytest.fixture
-def get_one_star_enabled_graph(request, get_dim):
-    g = nx.Graph()
-    g.add_nodes_from(range(get_dim))
-    i, j, k = sorted(np.random.choice(range(get_dim), replace=False, size=3))
-    g.add_edge(i, j)
-    g.add_edge(j, k)
-    gr = GraphWrapper(gr=g)
-
-    return gr
-
-
-@pytest.fixture
 def get_random_disct_edge_couple(request, get_empty_graph, get_random_edge):
     ego1 = get_random_edge
     print(ego1)

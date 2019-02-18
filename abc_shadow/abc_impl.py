@@ -3,8 +3,12 @@ from math import exp, sqrt
 import numpy as np
 from .model.graph_model import GraphModel
 from .graph.graph_wrapper import GraphWrapper
+
 from .sampler import mcmc_sampler
 import copy
+
+INF = -100
+SUP = 100
 
 """
 Implementation of ABC Shadow Algorithm
@@ -46,7 +50,7 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
     posteriors.append(theta_res)
 
     for i in range(iters - 1):
-        if i % 10 == 0:
+        if i % 1 == 0:
             msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
                 i, iters, n, sampler_it, theta_res)
             print(msg)
@@ -158,7 +162,7 @@ def get_candidate(theta, delta, mask=None):
     old = candidate_vector[candidate_indice]
     candidate_value = np.random.uniform(old - d / 2, old + d/2)
 
-    candidate_vector[candidate_indice] = candidate_value
+    candidate_vector[candidate_indice] = candidate_value if INF < candidate_value < SUP else old
 
     return candidate_vector
 
@@ -231,9 +235,10 @@ def metropolis_sampler(model, size, mh_sampler_it):
     samples = mcmc_sampler(init_sample, model, mh_sampler_it)
 
     summary = model.summary(samples)
-
+    # print({k: np.std(s)for k, s in summary.items()})
     vec = [np.average(stats) for stats in summary.values()]
-    return np.array(vec)
+    print(vec)
+    return np.array(vec)  # .astype(int)
 
 
 def binom_graph_sampler(model, size, it):

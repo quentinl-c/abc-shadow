@@ -17,6 +17,8 @@ from abc_shadow.model.binomial_model import BinomialModel
 from abc_shadow.model.norm_model import NormModel
 from abc_shadow.model.two_interactions_graph_model import \
     TwoInteractionsGraphModel
+from abc_shadow.model.ising_graph_model import IsingGraphModel
+
 
 ALGOS = ['abc_shadow', 'metropolis_hasting']
 
@@ -24,6 +26,7 @@ MODELS = ['normal',
           'binomial',
           'binomial_edge_graph',
           'binomial_graph',
+          'ising',
           '2_interactions']
 
 
@@ -94,6 +97,9 @@ def main():
         elif arguments.model == '2_interactions':
             model = TwoInteractionsGraphModel(*theta_perfect)
 
+        elif arguments.model == 'ising':
+            model = IsingGraphModel(*theta_perfect)
+
         else:
             err = "Unknown model: {}".format(arguments.model)
             raise ValueError(err)
@@ -106,7 +112,7 @@ def main():
         sim_data = config_model.getboolean('simData')
         if sim_data:
             print("Observation is being generated ...")
-            y_obs = sampler(model, size, sampler_it)
+            y_obs = sampler(model, size, 10000)
         else:
             y_obs = retrieve_vector(config_model.get('obs'))
 
@@ -114,7 +120,7 @@ def main():
 
         try:
             mask = retrieve_vector(config_model.get('mask'))
-            print("Mask has been set: {}".format(mask))
+            print("🎭  Mask has been set: {}".format(mask))
         except KeyError:
             mask = None
 
@@ -184,6 +190,8 @@ def main():
     record = dict()
     record['algo'] = arguments.algo
     record['model'] = arguments.model
+    record['theta0'] = theta_0.tolist()
+    record['theta_perf'] = theta_perfect.tolist()
     record['iters'] = iters
     record['n'] = n
     record['delta'] = delta.tolist() if isinstance(
