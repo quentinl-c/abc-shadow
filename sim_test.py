@@ -6,7 +6,9 @@ from abc_shadow.utils import dist_display, display
 from abc_shadow.abc_impl import binom_graph_sampler
 from abc_shadow.model.two_interactions_graph_model import \
     TwoInteractionsGraphModel
-from abc_shadow.model.ising_graph_model import IsingGraphModel
+from abc_shadow.model.strauss_graph_model import StraussGraphModel
+from abc_shadow.model.strauss_interactions_graph_model import \
+    StraussInterGraphModel
 import numpy as np
 import time
 
@@ -16,29 +18,33 @@ def main():
     np.random.seed(2018)
 
     # m = BinomialEdgeGraphModel(-2.197224577336219)
-    m = TwoInteractionsGraphModel(-4.2, 1, 1, 0.6)
+    # m = StraussInterGraphModel( 0.36995544, - 0.06460606,  0.3928767)
+    m = StraussGraphModel(12, 10, 12, 1)
+    # m = StraussGraphModel2(1, 4.8, 0.5)
+    # m = StraussGraphModel(-0.0680136,   0.39364956,  0.06566127,  1.13095765)
+    # m = TwoInteractionsGraphModel()
     # m = IsingGraphModel(0.5, 0.5, 0.5)
     # for _ in range(10):
 
-    g = GraphWrapper(10)
-    stats = list()
+    # stats = list()
     # for _ in range(100):
-    # start = time.time()
-    for i in range(1):
-        print(i)
-        res = mcmc_sampler(g, m, iters=1000)
+    start = time.time()
+    g = GraphWrapper(10)
+
+    # for i in range(1):
+    #     print(i)
+
+    res = mcmc_sampler(g, m, iters=400)
         # print(m.summary(res))
-        means = np.mean([s for s in m.summary(res).values()], axis=1)
-        print(means)
-        stats.append(means)
+    means = np.mean([s for s in m.summary(res).values()], axis=1)
+        # print(means)
+    print(time.time() - start)
 
-        # dist_display(res, m, prefix='hist_{}_'.format(i))
+    dist_display(res, m, prefix='hist__{}__'.format(0))
 
-        # display(res, m, "Model", prefix='_{}_'.format(i))
+    display(res, m, "Model", prefix='__{}__'.format(0))
 
-    print(np.mean(stats, axis=0))
-    print(np.std(stats, axis=0))
-    # print(time.time() - start)
+    print(means)
 
 
     # # print(" None edge count : {}; Edge count : {}".format(np.mean(stats['None edges counts']), np.mean(stats['Edges counts'])))
