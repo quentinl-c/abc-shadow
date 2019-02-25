@@ -13,13 +13,15 @@ class BinomialEdgeGraphModel(GraphModel):
 
     type_values = {0, 1}
 
-    def __init__(self, edge_param):
+    def __init__(self, *args):
         """Initialize Bernouilli (Edge
 
         Keyword Arguments:
             edge_param {float} -- value of edge parameter
         """
-        self._edge_param = edge_param
+        if len(args) != 1:
+            raise ValueError
+        super().__init__(*args)
 
     @property
     def edge_param(self):
@@ -29,16 +31,7 @@ class BinomialEdgeGraphModel(GraphModel):
             float -- Edge parameter
         """
 
-        return self._edge_param
-
-    @edge_param.setter
-    def edge_param(self, new_val):
-        """Set _edge_param instance variable
-
-        Arguments:
-            new_val {int} -- new value
-        """
-        self._edge_param = new_val
+        return self._params[0]
 
     def set_params(self, *args):
         """Set all parameter values belonging to the model
@@ -51,10 +44,10 @@ class BinomialEdgeGraphModel(GraphModel):
         Raises:
             ValueError -- if passed argument is not well sized
         """
-        if len(args) < 1:
+        if len(args) != 1:
             raise ValueError
 
-        self.edge_param = args[0]
+        super().set_params(*args)
 
     def evaluate(self, sample):
         """Given a graph (sample),
@@ -67,7 +60,7 @@ class BinomialEdgeGraphModel(GraphModel):
             float -- resulting energy
         """
 
-        return self._edge_param * sample.get_edge_count()
+        return self.edge_param * sample.get_edge_count()
 
     def get_local_energy(self, sample, edge, neigh=None):
         """Compute the energy delta regarding
@@ -85,7 +78,7 @@ class BinomialEdgeGraphModel(GraphModel):
         res = 0
 
         if edge_type == 1:
-            res = self._edge_param
+            res = self.edge_param
 
         return res
 
@@ -99,16 +92,10 @@ class BinomialEdgeGraphModel(GraphModel):
             float -- Energy U
         """
 
-        if len(args) < 1:
+        if len(args) != 1:
             raise ValueError
 
-        edge_side = self._edge_param * args[0]
-
-        return edge_side
-
-    @classmethod
-    def get_random_candidate_val(cls, p=None):
-        return random.choice(list(cls.type_values), p=p)
+        return super().evaluate_from_stats(*args)
 
     @staticmethod
     def summary(results):

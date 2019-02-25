@@ -1,41 +1,44 @@
 import numpy.random as random
-from .binomial_edge_graph_model import BinomialEdgeGraphModel
+from .graph_model import GraphModel
 
 
-class BinomialGraphModel(BinomialEdgeGraphModel):
+class BinomialGraphModel(GraphModel):
     """
     type_value is related to the different edge types
     - 0 : edge doesn't exist (no edge)
     - 1 : edge
     """
 
-    def __init__(self, none_edge_param, edge_param):
+    def __init__(self, *args):
         """Initialize Bernouilli (Edge
 
         Keyword Arguments:
             edge_param {float} -- value of edge parameter
         """
-        super().__init__(edge_param)
-        self._none_edge_param = none_edge_param
+        if len(args) != 2:
+            raise ValueError
+
+        super().__init__(*args)
 
     @property
     def none_edge_param(self):
+        """Get none edge parameter
+
+        Returns:
+            float -- Edge parameter
+        """
+
+        return self._params[0]
+
+    @property
+    def edge_param(self):
         """Get edge parameter
 
         Returns:
             float -- Edge parameter
         """
 
-        return self._none_edge_param
-
-    @none_edge_param.setter
-    def none_edge_param(self, new_val):
-        """Set _none_edge_param instance variable
-
-        Arguments:
-            new_val {int} -- new value
-        """
-        self._none_edge_param = new_val
+        return self._params[1]
 
     def set_params(self, *args):
         """Set all parameter values belonging to the model
@@ -48,11 +51,10 @@ class BinomialGraphModel(BinomialEdgeGraphModel):
         Raises:
             ValueError -- if passed argument is not well sized
         """
-        if len(args) < 2:
+        if len(args) != 2:
             raise ValueError
 
-        super().set_params(args[1])
-        self.none_edge_param = args[0]
+        return super().set_params(*args)
 
     def evaluate(self, sample):
         """Given a graph (sample),
@@ -64,9 +66,8 @@ class BinomialGraphModel(BinomialEdgeGraphModel):
         Returns:
             float -- resulting energy
         """
-
-        res = super().evaluate(sample)
-        res += self._none_edge_param * sample.get_none_edge_count()
+        res = self.none_edge_param * sample.get_none_edge_count()
+        res = self.edge_param * sample.get_edge_count()
         return res
 
     def get_local_energy(self, sample, edge, neigh=None):
@@ -81,14 +82,12 @@ class BinomialGraphModel(BinomialEdgeGraphModel):
             float -- Delta energy regarding edge and dyad parts
         """
 
-        res = super().get_local_energy(sample, edge)
-
         edge_type = sample.get_edge_type(edge)
 
         if edge_type == 0:
-            res += self._none_edge_param
-
-        return res
+            return self.none_edge_param
+        else:
+            return self.edge_param
 
     def evaluate_from_stats(self, *args):
         """Evaluate the energy (U) from sufficient statistics passed in argument
@@ -100,13 +99,10 @@ class BinomialGraphModel(BinomialEdgeGraphModel):
             float -- Energy U
         """
 
-        if len(args) < 2:
+        if len(args) != 2:
             raise ValueError
 
-        res = super().evaluate_from_stats(args[1])
-        res += self._none_edge_param * args[0]
-
-        return res
+        return super().evaluate_from_stats(*args)
 
     @staticmethod
     def summary(results):
@@ -119,8 +115,8 @@ class BinomialGraphModel(BinomialEdgeGraphModel):
             dict -- summary
         """
 
-        dataset = dict()
-        dataset["None edges counts"] = [g.get_none_edge_count()
+        data = dict()
+        data["None-edges-counts"] = [g.get_none_edge_count()
                                         for g in results]
-        dataset["Edges counts"] = [g.get_edge_count() for g in results]
-        return dataset
+        data["Edges-counts"] = [g.get_edge_count() for g in results]
+        return data

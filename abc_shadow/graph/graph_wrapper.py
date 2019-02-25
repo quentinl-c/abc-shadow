@@ -1,6 +1,7 @@
 import networkx as nx
 from collections.abc import Iterable
 from .utils import relabel_inv_line_graph
+import numpy as np
 
 DEFAULT_DIM = 10
 DEFAULT_LABEL = 0
@@ -219,32 +220,58 @@ class GraphWrapper(object):
         l_edges = [k for k, e in self.vertex.items() if e == t]
         return len(l_edges)
 
-    def get_diff_type_count(self):
+    def get_repulsion_count(self, excluded_labels=None):
         count = 0
 
-        enabled_edges = self.get_enabled_edges()
+        edges = self.vertex.keys()
 
-        for e in enabled_edges:
-            count += self.get_local_diff_type_count(e)
+        for e in edges:
+            count += self.get_local_repulsion_count(e,
+                                                    excluded_labels=excluded_labels)
 
         return count / 2
 
+    def get_interactions_count(self, inter_nbr):
+        interactions_count = np.zeros(inter_nbr)
+        edges = self.vertex.keys()
+
+        for e in edges:
+            local_count = self.get_local_interaction_count(e, inter_nbr)
+            interactions_count = np.add(interactions_count, local_count)
+
+
+        return interactions_count / 2
     ##############################################################
     # Local statistics
     ##############################################################
 
-    def get_local_diff_type_count(self, edge):
+    def get_local_repulsion_count(self, edge, excluded_labels=None):
+
+        excluded_labels = [] if excluded_labels is None else list(
+            excluded_labels)
+
         ego_type = self.get_edge_type(edge)
 
-        if not ego_type:
+        if ego_type in excluded_labels:
             return 0
 
         count = 0
 
         for n in self.get_edge_neighbourhood(edge):
-        # self.get_edge_neighbourhood(edge)
             label = self.vertex[n]
-            if label != 0 and label != ego_type:
+            if label != ego_type and label not in excluded_labels:
                 count += 1
 
         return count
+
+    def get_local_interaction_count(self, edge, inter_nbr):
+        interactions_count = np.zeros(inter_nbr)
+        ego_type = self.get_edge_type(edge)
+
+        for n in self.get_edge_neighbourhood(edge):
+            label = self.vertex[n]
+            if label != ego_type:
+                idx = ego_type + label - 1
+                interactions_count[idx] += 1
+
+        return interactions_count

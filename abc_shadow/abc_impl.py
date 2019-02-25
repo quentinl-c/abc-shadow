@@ -50,7 +50,7 @@ def abc_shadow(model, theta_0, y, delta, n, size, iters,
     posteriors.append(theta_res)
 
     for i in range(iters - 1):
-        if i % 1 == 0:
+        if i % 100 == 0:
             msg = "🔎  Iteration {} / {} n : {}, samplerit {}, theta {}".format(
                 i, iters, n, sampler_it, theta_res)
             print(msg)
@@ -195,8 +195,8 @@ def normal_sampler(model, size, it):
 
     for _ in range(it):
 
-        sample = np.random.normal(model.get_mean(),
-                                  sqrt(model.get_var()), size)
+        sample = np.random.normal(model.mean,
+                                  sqrt(model.var), size)
         samples.append(sample)
 
     y_sim = [np.average(stats) for stats in model.summary(samples).values()]
@@ -235,10 +235,10 @@ def metropolis_sampler(model, size, mh_sampler_it):
     samples = mcmc_sampler(init_sample, model, mh_sampler_it)
 
     summary = model.summary(samples)
-    # print({k: np.std(s)for k, s in summary.items()})
+
     vec = [np.average(stats) for stats in summary.values()]
-    print(vec)
-    return np.array(vec)  # .astype(int)
+
+    return np.array(vec)
 
 
 def binom_graph_sampler(model, size, it):

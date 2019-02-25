@@ -18,7 +18,9 @@ from abc_shadow.model.norm_model import NormModel
 from abc_shadow.model.two_interactions_graph_model import \
     TwoInteractionsGraphModel
 from abc_shadow.model.ising_graph_model import IsingGraphModel
-
+from abc_shadow.model.strauss_graph_model import StraussGraphModel
+from abc_shadow.model.strauss_interactions_graph_model import \
+    StraussInterGraphModel
 
 ALGOS = ['abc_shadow', 'metropolis_hasting']
 
@@ -26,6 +28,8 @@ MODELS = ['normal',
           'binomial',
           'binomial_edge_graph',
           'binomial_graph',
+          'strauss_graph',
+          'strauss_inter_graph',
           'ising',
           '2_interactions']
 
@@ -100,6 +104,12 @@ def main():
         elif arguments.model == 'ising':
             model = IsingGraphModel(*theta_perfect)
 
+        elif arguments.model == 'strauss_graph':
+            model = StraussGraphModel(*theta_perfect)
+
+        elif arguments.model == 'strauss_inter_graph':
+            model = StraussInterGraphModel(*theta_perfect)
+
         else:
             err = "Unknown model: {}".format(arguments.model)
             raise ValueError(err)
@@ -112,7 +122,7 @@ def main():
         sim_data = config_model.getboolean('simData')
         if sim_data:
             print("Observation is being generated ...")
-            y_obs = sampler(model, size, 10000)
+            y_obs = sampler(model, size, 1000)
         else:
             y_obs = retrieve_vector(config_model.get('obs'))
 

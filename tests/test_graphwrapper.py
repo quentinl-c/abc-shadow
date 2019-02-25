@@ -113,7 +113,7 @@ def test_copy(get_empty_graph, get_random_edges):
 
 
 @pytest.mark.usefixtueres("get_empty_graph", "get_random_edge")
-def test_get_local_diff_type_count(get_empty_graph, get_random_edge):
+def test_get_local_repulsion_count(get_empty_graph, get_random_edge):
     gr = get_empty_graph
     ego = get_random_edge
 
@@ -134,13 +134,13 @@ def test_get_local_diff_type_count(get_empty_graph, get_random_edge):
         gr.set_edge_type(o, 1)
 
     expected = len(alters)
-    local_diff_type_count = gr.get_local_diff_type_count(ego)
+    local_diff_type_count = gr.get_local_repulsion_count(ego, excluded_labels=[0])
 
     assert local_diff_type_count == expected
 
 
 @pytest.mark.usefixtueres("get_empty_graph")
-def test_get_diff_type_count(get_empty_graph):
+def test_get_repulsion_count(get_empty_graph):
     gr = get_empty_graph
     ego1 = (1, 2)
     gr.set_edge_type(ego1, 1)
@@ -163,5 +163,5 @@ def test_get_diff_type_count(get_empty_graph):
         gr.set_edge_type(o2, 1)
 
     expected = len(alters1) + len(alters2) + len(others1) + len(others2)
-    diff_type_count = gr.get_diff_type_count()
+    diff_type_count = gr.get_repulsion_count(excluded_labels=[0])
     assert diff_type_count == expected

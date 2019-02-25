@@ -1,26 +1,14 @@
-from abc import ABC, abstractmethod
+from .model import Model
 import numpy.random as random
+from abc import abstractmethod
 
 
-class GraphModel(ABC):
+class GraphModel(Model):
 
     type_values = {0, 1}
 
     @abstractmethod
     def get_local_energy(sample, edge, neigh=None):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def summary(results):
-        pass
-
-    @abstractmethod
-    def evaluate_from_stats(self, *args):
-        pass
-
-    @abstractmethod
-    def evaluate(self, sample):
         pass
 
     def compute_delta(self, mut_sample, edge, new_val):

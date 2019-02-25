@@ -2,13 +2,17 @@ import numpy as np
 
 from collections import Counter
 import pytest
-from abc_shadow.model.two_interactions_graph_model import TwoInteractionsGraphModel
+from abc_shadow.model.two_interactions_graph_model import \
+    TwoInteractionsGraphModel
 
 
 def test_init():
     l0_expected, l1_expected, l2_expected, l12_expected = np.random.uniform(
         0, 100, size=4)
-    model = TwoInteractionsGraphModel(l0_expected, l1_expected, l2_expected, l12_expected)
+    model = TwoInteractionsGraphModel(l0_expected,
+                                      l1_expected,
+                                      l2_expected,
+                                      l12_expected)
 
     assert model.l0 == l0_expected
     assert model.l1 == l1_expected
@@ -50,24 +54,24 @@ def test_get_local_energy(get_empty_graph):
 
     # edge is set to 0
     gr.set_edge_type(ego, 0)
-    expected_local_u = params[0]
+    expected_local_u = 0
     given_u = model.get_local_energy(gr, ego, gr.graph[ego])
     assert expected_local_u == given_u
 
     # edge is set to 1
     gr.set_edge_type(ego, 1)
-    expected_local_u = params[1] + summary[2] * params[3]
+    expected_local_u = params[0] + params[1] + summary[2] * params[3]
     given_u = model.get_local_energy(gr, ego, gr.graph[ego])
     assert expected_local_u == given_u
 
     # edge is set to 2
     gr.set_edge_type(ego, 2)
-    expected_local_u = params[2] + summary[1] * params[3]
+    expected_local_u = params[0] + params[2] + summary[1] * params[3]
     given_u = model.get_local_energy(gr, ego, gr.graph[ego])
     assert expected_local_u == given_u
 
     model.set_params(0, 0, 0, 1)
-    expected_local_u = gr.get_local_diff_type_count(ego)
+    expected_local_u = gr.get_local_repulsion_count(ego, excluded_labels=[0])
     given_u = model.get_local_energy(gr, ego, gr.graph[ego])
     assert expected_local_u == given_u
 
@@ -87,12 +91,13 @@ def test_compute_delta(get_empty_graph):
 
     # Move 0 -> 1
     gr.set_edge_type(ego, 0)
-    expected_delta = params[1] + summary[2] * params[3] - params[0]
+    expected_delta = params[0] + params[1] + summary[2] * params[3]
     given_delta = model.compute_delta(gr, ego, 1)
     assert expected_delta == given_delta
 
     # move 1 -> 2
     gr.set_edge_type(ego, 1)
-    expected_delta = params[2] + summary[1] * params[3] - (params[1] + summary[2] * params[3])
+    expected_delta = params[0] + params[2] + summary[1] * \
+        params[3] - (params[0] + params[1] + summary[2] * params[3])
     given_delta = model.compute_delta(gr, ego, 2)
     assert expected_delta == given_delta

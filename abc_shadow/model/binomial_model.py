@@ -1,26 +1,29 @@
 from math import log, exp
+from .model import Model
 
 
-class BinomialModel(object):
-    def __init__(self, n, theta):
-        self.__n = n
-        self.__theta = theta
+class BinomialModel(Model):
+    def __init__(self, *args):
+        if len(args) != 2:
+            raise ValueError
+
+        super().__init__(*args)
 
     @property
     def n(self):
-        return self.__n
+        return self._params[0]
 
     @property
     def theta(self):
-        return self.__theta
+        return self._params[1]
 
     @theta.setter
-    def theta(self, theta_new):
-        self.__theta = theta_new
+    def theta(self, new_theta):
+        self._params[1] = new_theta
 
     def set_params(self, *args):
 
-        if len(args) < 1:
+        if len(args) != 1:
             raise ValueError("⛔️ Given args lenght:{}, expected: 1".format(
                 len(args)))
 
@@ -32,7 +35,7 @@ class BinomialModel(object):
         return res
 
     def evaluate_from_stats(self, *args):
-        if len(args) < 1:
+        if len(args) != 1:
             raise ValueError("⛔️ Given stats lenght:{}, expected: 1".format(
                 len(args)))
         return self.evaluate(args[0])

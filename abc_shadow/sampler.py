@@ -1,4 +1,3 @@
-import copy
 from math import exp
 import numpy as np
 from .model.graph_model import GraphModel
@@ -6,7 +5,7 @@ from .model.graph_model import GraphModel
 DEFAULT_ITER = 100
 
 
-def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=0, by=1):
+def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
     """Executes Metropolis Hasting sampler algorith
 
     Arguments:
@@ -30,12 +29,12 @@ def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=0, by=1):
 
     # resulting list
     results = list()
-    for i in range(iters):
+
     # for i in range(burnin + by * iters):
+    for i in range(iters):
         if i >= burnin and i % by == 0:
             results.append(sample.copy())
 
-        # print("Iteration {}".format(it))
         for e in sample.get_elements():
 
             old_val = sample.get_edge_type(e)
