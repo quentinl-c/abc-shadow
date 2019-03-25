@@ -15,12 +15,7 @@ from abc_shadow.model.binomial_edge_graph_model import BinomialEdgeGraphModel
 from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 from abc_shadow.model.binomial_model import BinomialModel
 from abc_shadow.model.norm_model import NormModel
-from abc_shadow.model.two_interactions_graph_model import \
-    TwoInteractionsGraphModel
-from abc_shadow.model.ising_graph_model import IsingGraphModel
-from abc_shadow.model.strauss_graph_model import StraussGraphModel
-from abc_shadow.model.strauss_interactions_graph_model import \
-    StraussInterGraphModel
+from abc_shadow.model.potts_graph_model import PottsGraphModel
 
 ALGOS = ['abc_shadow', 'metropolis_hasting']
 
@@ -28,10 +23,7 @@ MODELS = ['normal',
           'binomial',
           'binomial_edge_graph',
           'binomial_graph',
-          'strauss_graph',
-          'strauss_inter_graph',
-          'ising',
-          '2_interactions']
+          'potts_graph']
 
 
 def main():
@@ -98,17 +90,8 @@ def main():
         elif arguments.model == 'binomial_graph':
             model = BinomialGraphModel(*theta_perfect)
 
-        elif arguments.model == '2_interactions':
-            model = TwoInteractionsGraphModel(*theta_perfect)
-
-        elif arguments.model == 'ising':
-            model = IsingGraphModel(*theta_perfect)
-
-        elif arguments.model == 'strauss_graph':
-            model = StraussGraphModel(*theta_perfect)
-
-        elif arguments.model == 'strauss_inter_graph':
-            model = StraussInterGraphModel(*theta_perfect)
+        elif arguments.model == 'potts_graph':
+            model = PottsGraphModel(*theta_perfect)
 
         else:
             err = "Unknown model: {}".format(arguments.model)
@@ -122,7 +105,7 @@ def main():
         sim_data = config_model.getboolean('simData')
         if sim_data:
             print("Observation is being generated ...")
-            y_obs = sampler(model, size, 1000)
+            y_obs = sampler(model, size, sampler_it)
         else:
             y_obs = retrieve_vector(config_model.get('obs'))
 
@@ -182,13 +165,12 @@ def main():
                 theta_perfect[0], theta_perfect[1], size)
             mask = [1, 0]
 
-            print("mask is forces to: {}".format(mask))
+            print("mask is forced to: {}".format(mask))
         else:
             err = "metropolis hasting cannot be used on a graph model"
             raise ValueError(err)
 
         print("📊 Model {} has been instanciated".format(arguments.model))
-        print("Data observed: {}".format(y_obs))
 
         posteriors = mh_post_sampler(
             theta_0, y_obs, delta, n, iters, ratio, mask=mask)

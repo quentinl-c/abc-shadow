@@ -4,11 +4,7 @@ from abc_shadow.model.binomial_graph_model import BinomialGraphModel
 from abc_shadow.model.binomial_edge_graph_model import BinomialEdgeGraphModel
 from abc_shadow.utils import dist_display, display
 from abc_shadow.abc_impl import binom_graph_sampler
-from abc_shadow.model.two_interactions_graph_model import \
-    TwoInteractionsGraphModel
-from abc_shadow.model.strauss_graph_model import StraussGraphModel
-from abc_shadow.model.strauss_interactions_graph_model import \
-    StraussInterGraphModel
+from abc_shadow.model.potts_graph_model import PottsGraphModel
 import numpy as np
 import time
 
@@ -18,8 +14,9 @@ def main():
     np.random.seed(2018)
 
     # m = BinomialEdgeGraphModel(-2.197224577336219)
-    # m = StraussInterGraphModel( 0.36995544, - 0.06460606,  0.3928767)
-    m = StraussGraphModel(12, 10, 12, 1)
+    m = PottsGraphModel(0.535, -0.06, 0.535)
+    # m = StraussInterGraphModel(0.535, -0.06, 0.535)
+    # m = StraussGraphModel(12, 10, 12, 1)
     # m = StraussGraphModel2(1, 4.8, 0.5)
     # m = StraussGraphModel(-0.0680136,   0.39364956,  0.06566127,  1.13095765)
     # m = TwoInteractionsGraphModel()
@@ -33,9 +30,17 @@ def main():
 
     # for i in range(1):
     #     print(i)
+    iters = 10000
 
-    res = mcmc_sampler(g, m, iters=400)
+    res = mcmc_sampler(g, m, iters=iters)
         # print(m.summary(res))
+
+    summary = [s for s in m.summary(res).values()]
+    with open('sim-map.txt', 'w') as res_file:
+        for it in range(iters - 1):
+            line = " ".join([str(summary[0][it]), str(summary[1][it]), str(summary[2][it])])
+            res_file.writelines(line + "\n")
+
     means = np.mean([s for s in m.summary(res).values()], axis=1)
         # print(means)
     print(time.time() - start)
