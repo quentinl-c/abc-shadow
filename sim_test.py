@@ -30,26 +30,31 @@ def main():
 
     # for i in range(1):
     #     print(i)
-    iters = 10000
+    iters = 500
 
     res = mcmc_sampler(g, m, iters=iters)
         # print(m.summary(res))
 
-    summary = [s for s in m.summary(res).values()]
-    with open('sim-map.txt', 'w') as res_file:
-        for it in range(iters - 1):
-            line = " ".join([str(summary[0][it]), str(summary[1][it]), str(summary[2][it])])
-            res_file.writelines(line + "\n")
+    # summary = [np.mean(s) for s in m.summary(res).values()]
 
-    means = np.mean([s for s in m.summary(res).values()], axis=1)
-        # print(means)
     print(time.time() - start)
+    # print(summary)
+    print(res)
+    # ##################  SAVE INTO FILE INSTRUCTION ##################
+    # with open('sim-map.txt', 'w') as res_file:
+    #     for it in range(iters - 1):
+    #         line = " ".join([str(summary[0][it]), str(summary[1][it]), str(summary[2][it])])
+    #         res_file.writelines(line + "\n")
 
-    dist_display(res, m, prefix='hist__{}__'.format(0))
+    # means = np.mean([s for s in m.summary(res).values()], axis=1)
+    #     # print(means)
+    # print(time.time() - start)
 
-    display(res, m, "Model", prefix='__{}__'.format(0))
+    #dist_display(res, m, prefix='hist__{}__'.format(0))
 
-    print(means)
+    #display(res, m, "Model", prefix='__{}__'.format(0))
+
+    # print(means)
 
 
     # # print(" None edge count : {}; Edge count : {}".format(np.mean(stats['None edges counts']), np.mean(stats['Edges counts'])))

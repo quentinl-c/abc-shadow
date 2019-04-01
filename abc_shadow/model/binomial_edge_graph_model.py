@@ -1,5 +1,6 @@
 import numpy.random as random
 from .graph_model import GraphModel
+from collections import Iterable
 
 
 class BinomialEdgeGraphModel(GraphModel):
@@ -107,7 +108,8 @@ class BinomialEdgeGraphModel(GraphModel):
         Returns:
             dict -- summary
         """
-
+        if not isinstance(results, Iterable):
+            results = [results]
         dataset = dict()
         dataset['Edges counts'] = [g.get_edge_count() for g in results]
         return dataset

@@ -1,17 +1,14 @@
-from .model import Model
+# distutils: language = c++
+# cython: boundscheck = False
+from model cimport Model
 import numpy.random as random
-from abc import abstractmethod
 
 
-class GraphModel(Model):
+cdef class GraphModel(Model):
 
     type_values = {0, 1}
 
-    @abstractmethod
-    def get_local_energy(sample, edge, neigh=None):
-        pass
-
-    def compute_delta(self, mut_sample, edge, new_val):
+    cdef double _compute_delta(self, mut_sample, cpp_edge edge, int new_val):
         """Given a graph sample (mut_sample), an edge on which we will
         affect the new attribute value (new_val),
         computes difference between the new energy (on the modified sample)
@@ -31,16 +28,19 @@ class GraphModel(Model):
             float -- Energy delta between modified sample and initial one
         """
         # neigh = [mut_sample.vertex[n] for n in mut_sample.get_edge_neighbourhood(edge)]
-        neigh = mut_sample.get_edge_neighbourhood(edge)
-        old_energy = self.get_local_energy(mut_sample, edge, neigh=neigh)
+        cdef cpp_vector[cpp_edge] neigh = mut_sample.get_edge_neighbourhood(edge)
+        cdef double old_energy = self.get_local_energy(mut_sample, edge, neigh=neigh)
 
         mut_sample.set_edge_type(edge, new_val)
 
         # Computes the delta between old and new energy
-        new_energy = self.get_local_energy(mut_sample, edge, neigh=neigh)
-        delta = new_energy - old_energy
+        cdef double new_energy = self.get_local_energy(mut_sample, edge, neigh=neigh)
+        cdef double delta = new_energy - old_energy
 
         return delta
+
+    cpdef double compute_delta(self, mut_sample, cpp_edge edge, int new_val):
+        return self._compute_delta(mut_sample, edge, new_val)
 
     @classmethod
     def get_random_candidate_val(cls, p=None):

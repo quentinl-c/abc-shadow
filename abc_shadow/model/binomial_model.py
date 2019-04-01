@@ -1,5 +1,6 @@
 from math import log, exp
 from .model import Model
+from collections import Iterable
 
 
 class BinomialModel(Model):
@@ -42,7 +43,8 @@ class BinomialModel(Model):
 
     @staticmethod
     def summary(results):
-
+        if not isinstance(results, Iterable):
+            results = [results]
         dataset = dict()
         dataset["successes"] = results
 

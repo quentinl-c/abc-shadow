@@ -1,3 +1,4 @@
+from collections import Iterable
 import numpy as np
 from .model import Model
 
@@ -43,6 +44,8 @@ class NormModel(Model):
 
     @staticmethod
     def summary(results):
+        if not isinstance(results, Iterable):
+            results = [results]
 
         dataset = dict()
         dataset["sum"] = [sum(r) for r in results]

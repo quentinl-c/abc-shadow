@@ -112,3 +112,6 @@ venv.bak/
 ### Others ###
 *.pdf
 .Rproj.user
+*.c
+*.cpp
+*.html

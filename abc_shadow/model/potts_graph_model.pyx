@@ -1,8 +1,14 @@
-from .graph_model import GraphModel
+# distutils: language = c++
+# cython: boundscheck = False
+
+from graph_model cimport GraphModel
 import numpy as np
+cimport numpy as np
+from collections import Iterable
 
+from numpy cimport ndarray
 
-class PottsGraphModel(GraphModel):
+cdef class PottsGraphModel(GraphModel):
     type_values = {0, 1, 2}
 
     def __init__(self, *args):
@@ -49,7 +55,7 @@ class PottsGraphModel(GraphModel):
         interactions_count = sample.get_interactions_count(3)
         return np.dot(self._params, interactions_count)
 
-    def get_local_energy(self, sample, edge, neigh):
+    cdef get_local_energy(self, sample, edge, neigh):
         """Compute the local energy.
 
         Arguments:
@@ -59,11 +65,11 @@ class PottsGraphModel(GraphModel):
         Returns:
             float -- Delta energy
         """
-        edge_type = sample.get_edge_type(edge)
-        interactions_count = np.zeros(3)
+        cdef int edge_type = sample.get_edge_type(edge)
+        cdef ndarray[double] interactions_count = np.zeros(3)
 
         for t in neigh:
-            n_label = sample.vertex[t]
+            n_label = sample.get_edge_type(t)
             if n_label != edge_type:
                 idx = edge_type + n_label - 1
                 interactions_count[idx] += 1
@@ -81,3 +87,7 @@ class PottsGraphModel(GraphModel):
         data['beta12'] = res[:, 2]
 
         return data
+
+    @staticmethod
+    def sufficient_stats(result):
+        return result.get_interactions_count(3)
