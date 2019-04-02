@@ -1,11 +1,18 @@
-from math import exp
+from libc.math cimport exp
 import numpy as np
+cimport numpy as np
+import cython
 from .model.graph_model import GraphModel
 
 DEFAULT_ITER = 100
 
 
-def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
+cpdef mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
+    return _mcmc_sampler(sample, model, iters=iters, burnin=burnin, by=by)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef _mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
     """Executes Metropolis Hasting sampler algorith
 
     Arguments:
@@ -28,7 +35,10 @@ def mcmc_sampler(sample, model, iters=DEFAULT_ITER, burnin=1, by=1):
         raise ValueError(err_msg)
 
     # resulting list
-    results = list()
+    cdef list results = list()
+    cdef int old_val, new_val, i
+    cdef double epsilon
+    cdef np.float_t delta
 
     # for i in range(burnin + by * iters):
     for i in range(iters):
