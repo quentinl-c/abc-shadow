@@ -13,6 +13,10 @@ class Model(ABC):
     def evaluate_from_stats(self, *args):
         return np.dot(self._params, args)
 
+    @property
+    def params(self):
+        return self._params
+
     @staticmethod
     @abstractmethod
     def summary(results):

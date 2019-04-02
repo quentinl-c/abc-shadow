@@ -23,6 +23,10 @@ class PottsGraphModel(GraphModel):
     def beata12(self):
         return self._params[2]
 
+    @property
+    def params(self):
+        return self._params
+
     def set_params(self, *args):
 
         if len(args) != 3:
@@ -59,17 +63,29 @@ class PottsGraphModel(GraphModel):
         Returns:
             float -- Delta energy
         """
-        edge_type = sample.get_edge_type(edge)
-        interactions_count = np.zeros(3)
+        # edge_type = sample.get_edge_type(edge)
+        interactions_count = sample.get_local_interaction_count(edge, 3)
+        # interactions_count = np.zeros(3)
 
-        for t in neigh:
-            n_label = sample.vertex[t]
-            if n_label != edge_type:
-                idx = edge_type + n_label - 1
-                interactions_count[idx] += 1
+        # for t in neigh:
+        #     n_label = sample.vertex[t]
+        #     if n_label != edge_type:
+        #         idx = edge_type + n_label - 1
+        #         interactions_count[idx] += 1
         res = np.dot(self._params, interactions_count)
 
         return res
+
+    @staticmethod
+    def get_delta_stats(mut_sample, edge, new_label):
+        stats_before = mut_sample.get_local_interaction_count(edge, 3)
+        mut_sample.set_edge_type(edge, new_label)
+        stats_after = mut_sample.get_local_interaction_count(edge, 3)
+        return stats_after - stats_before
+
+    @staticmethod
+    def get_stats(sample):
+        return sample.get_interactions_count(3)
 
     @staticmethod
     def summary(results):
