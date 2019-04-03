@@ -3,7 +3,7 @@ import numpy as np
 
 
 class PottsGraphModel(GraphModel):
-    type_values = {0, 1, 2}
+    type_values = [0, 1, 2]
 
     def __init__(self, *args):
         if len(args) != 3:
@@ -63,32 +63,23 @@ class PottsGraphModel(GraphModel):
         Returns:
             float -- Delta energy
         """
-        # edge_type = sample.get_edge_type(edge)
-        interactions_count = sample.get_local_interaction_count(edge, 3)
-        # interactions_count = np.zeros(3)
 
-        # for t in neigh:
-        #     n_label = sample.vertex[t]
-        #     if n_label != edge_type:
-        #         idx = edge_type + n_label - 1
-        #         interactions_count[idx] += 1
+        interactions_count = sample.get_local_interaction_count(edge, 3)
+
         res = np.dot(self._params, interactions_count)
 
         return res
 
     @staticmethod
     def get_delta_stats(mut_sample, edge, new_label):
-        stats_before = mut_sample.get_local_interaction_count(edge, 3)
-        mut_sample.set_edge_type(edge, new_label)
-        stats_after = mut_sample.get_local_interaction_count(edge, 3)
-        return stats_after - stats_before
+        return mut_sample.get_local_interaction_diff(edge, 3, new_label)
 
     @staticmethod
     def get_stats(sample):
         return sample.get_interactions_count(3)
 
     @staticmethod
-    def summary(results):
+    def summary_dict(results):
         data = dict()
 
         res = np.array([g.get_interactions_count(3) for g in results])

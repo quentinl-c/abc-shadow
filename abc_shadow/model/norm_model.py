@@ -42,7 +42,7 @@ class NormModel(Model):
         return res
 
     @staticmethod
-    def summary(results):
+    def summary_dict(results):
 
         dataset = dict()
         dataset["sum"] = [sum(r) for r in results]

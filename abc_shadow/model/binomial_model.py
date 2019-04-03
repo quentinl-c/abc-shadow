@@ -41,7 +41,7 @@ class BinomialModel(Model):
         return self.evaluate(args[0])
 
     @staticmethod
-    def summary(results):
+    def summary_dict(results):
 
         dataset = dict()
         dataset["successes"] = results

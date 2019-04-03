@@ -86,14 +86,13 @@ def test_get_local_energy(get_empty_graph, get_random_edge):
 
 
 @pytest.mark.usefixtures("get_empty_graph", "get_random_edge")
-def test_compute_delta(get_empty_graph, get_random_edge):
+def test_compute_delta_stats(get_empty_graph, get_random_edge):
     sample = get_empty_graph
-
-    edge_param = np.random.uniform(0, 100)
-    model = BinomialEdgeGraphModel(edge_param)
     e = get_random_edge
 
-    delta_expected = edge_param
-    delta = model.compute_delta(sample, e, 1)
+    model = BinomialEdgeGraphModel(0)
+    delta_stats = model.get_delta_stats(sample, e, 1)
 
-    assert delta == delta_expected
+    expected_delta_stats = np.array([1])
+
+    assert delta_stats - expected_delta_stats

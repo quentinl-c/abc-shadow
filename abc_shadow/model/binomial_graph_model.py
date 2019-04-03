@@ -1,4 +1,4 @@
-import numpy.random as random
+import numpy as np
 from .graph_model import GraphModel
 
 
@@ -105,7 +105,16 @@ class BinomialGraphModel(GraphModel):
         return super().evaluate_from_stats(*args)
 
     @staticmethod
-    def summary(results):
+    def get_delta_stats(mut_sample, edge, new_label):
+        res = np.zeros(2)
+        old_label = mut_sample.get_edge_type(edge)
+        res[old_label] -= 1
+        mut_sample.set_edge_type(edge, new_label)
+        res[new_label] += 1
+        return res
+
+    @staticmethod
+    def summary_dict(results):
         """Creates a summary of configuration values according to the current model
 
         Arguments:

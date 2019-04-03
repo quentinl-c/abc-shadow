@@ -18,7 +18,7 @@ for p in data[::100]:
     print(p)
     res = mcmc_sampler(g, m, iters=1000)
 
-    # print(m.summary(res))
-    stats = [np.mean(s) for s in m.summary(res).values()]
+    # print(m.summary_dict(res))
+    stats = [np.mean(s) for s in m.summary_dict(res).values()]
     print("Edge count : {} 2 star Counts : {} ".format(*stats))
     print("U = {}".format(m.evaluate_from_stats(*stats)))

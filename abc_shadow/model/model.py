@@ -19,7 +19,7 @@ class Model(ABC):
 
     @staticmethod
     @abstractmethod
-    def summary(results):
+    def summary_dict(results):
         pass
 
     @abstractmethod

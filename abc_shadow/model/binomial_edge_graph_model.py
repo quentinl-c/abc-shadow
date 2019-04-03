@@ -1,4 +1,4 @@
-import numpy.random as random
+import numpy as np
 from .graph_model import GraphModel
 
 
@@ -11,7 +11,7 @@ class BinomialEdgeGraphModel(GraphModel):
     Binomial Model taking into account just the edge parameter
     """
 
-    type_values = {0, 1}
+    type_values = [0, 1]
 
     def __init__(self, *args):
         """Initialize Bernouilli (Edge
@@ -98,7 +98,15 @@ class BinomialEdgeGraphModel(GraphModel):
         return super().evaluate_from_stats(*args)
 
     @staticmethod
-    def summary(results):
+    def get_delta_stats(mut_sample, edge, new_label):
+        res = np.zeros(1)
+        old_label = mut_sample.get_edge_type(edge)
+        mut_sample.set_edge_type(edge, new_label)
+        res[0] = old_label - new_label
+        return res
+
+    @staticmethod
+    def summary_dict(results):
         """Creates a summary of configuration values according to the current model
 
         Arguments:

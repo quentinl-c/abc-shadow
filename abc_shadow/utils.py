@@ -49,7 +49,7 @@ def display(results,  model, title, prefix=""):
         prefix {str} - - [description](default: {""})
     """
 
-    dataset = model.summary(results)
+    dataset = model.summary_dict(results)
     fig = plt.figure(figsize=(10, 10))
 
     for idx, label in enumerate(dataset):
@@ -95,7 +95,7 @@ def dist_display(results, model, prefix=""):
     Keyword Arguments:
         prefix {str} -- filename prefix (default: {""})
     """
-    dataset = model.summary(results)
+    dataset = model.summary_dict(results)
 
     fig = plt.figure(figsize=(20, 20))
     fig.suptitle('Distribution Summary', fontsize=30)

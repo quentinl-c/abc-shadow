@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from .utils import relabel_inv_line_graph
 from numpy cimport ndarray
 import numpy as np
+import cython
 
 DEFAULT_DIM = 10
 DEFAULT_LABEL = 0
@@ -145,7 +146,7 @@ cdef class GraphWrapper(object):
             List[EdgeId] -- list of edge identifiers (tuple)
         """
 
-        return self.vertex.keys()
+        return self._vertex.keys()
 
     cpdef get_edge_type(self, edge_id):
         """Given an edge id
@@ -157,7 +158,7 @@ cdef class GraphWrapper(object):
         Returns:
             int -- Edge type
         """
-        return self.vertex[edge_id]
+        return self._vertex[edge_id]
 
     cpdef is_active_edge(self, edge_id):
         """Returns True if the edge referred by edge_id
@@ -174,10 +175,10 @@ cdef class GraphWrapper(object):
         return self.get_edge_type(edge_id) != 0
 
     cpdef get_enabled_edges(self):
-        return [k for k, e in self.vertex.items() if e != 0]
+        return [k for k, e in self._vertex.items() if e != 0]
 
     cpdef get_disabled_edges(self):
-        return [k for k, e in self.vertex.items() if not e]
+        return [k for k, e in self._vertex.items() if not e]
 
     cpdef set_edge_type(self, edge_id, new_val):
         """Givent an edge id
@@ -194,7 +195,7 @@ cdef class GraphWrapper(object):
             msg = "🤯 Edge Type must be an integer"
             raise TypeError(msg)
 
-        self.vertex[edge_id] = val
+        self._vertex[edge_id] = val
 
     cpdef get_edge_neighbourhood(self, edge):
         """Get the neighbourhood of the edge
@@ -209,7 +210,7 @@ cdef class GraphWrapper(object):
 
         # Returns only active edge in the neighborhood
 
-        return self.graph[edge]
+        return self._graph[edge]
 
     cpdef get_density(self):
         enabled_edges = len(self.get_enabled_edges())
@@ -222,13 +223,13 @@ cdef class GraphWrapper(object):
         return d
 
     cpdef get_edge_type_count(self, t):
-        l_edges = [k for k, e in self.vertex.items() if e == t]
+        l_edges = [k for k, e in self._vertex.items() if e == t]
         return len(l_edges)
 
     cpdef get_repulsion_count(self, excluded_labels=None):
         count = 0
 
-        edges = self.vertex.keys()
+        edges = self._vertex.keys()
 
         for e in edges:
             count += self.get_local_repulsion_count(e,
@@ -236,6 +237,8 @@ cdef class GraphWrapper(object):
 
         return count / 2
 
+    @cython.boundscheck(False)
+    @cython.cdivision(True)
     cpdef ndarray[double] get_interactions_count(self, int inter_nbr):
         cdef ndarray[double] interactions_count = np.zeros(inter_nbr)
         cdef list edges = list(self._vertex.keys())
@@ -269,16 +272,32 @@ cdef class GraphWrapper(object):
                 count += 1
 
         return count
-
-    cpdef ndarray[double] get_local_interaction_count(self, edge, inter_nbr):
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cpdef ndarray[double] get_local_interaction_count(self, tuple edge, int inter_nbr):
         cdef ndarray[double] interactions_count = np.zeros(inter_nbr)
-        cdef int ego_type = self.get_edge_type(edge)
+        cdef int ego_type = self._vertex[edge]
         cdef int label, idx
 
-        for n in self.get_edge_neighbourhood(edge):
+        for n in self._graph[edge]:
             label = self._vertex[n]
             if label != ego_type:
-                idx = ego_type + label - 1
-                interactions_count[idx] += 1
+                interactions_count[ego_type + label - 1] += 1
 
+        return interactions_count
+
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cpdef ndarray[double] get_local_interaction_diff(self, tuple edge, int inter_nbr, int new_ego_type):
+        cdef ndarray[double] interactions_count = np.zeros(inter_nbr)
+        cdef int current_ego_type = self._vertex[edge]
+        cdef int label, idx
+
+        for n in self._graph[edge]:
+            label = self._vertex[n]
+            if label != current_ego_type:
+                interactions_count[current_ego_type + label - 1] -= 1
+            if label != new_ego_type:
+                interactions_count[new_ego_type + label - 1] += 1
+        self._vertex[edge] = new_ego_type
         return interactions_count
